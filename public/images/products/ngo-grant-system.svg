@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="#0B2545"/>
+  <rect x="40" y="40" width="720" height="520" rx="8" fill="#132D4A"/>
+  <rect x="60" y="60" width="160" height="8" rx="4" fill="#C9A227"/>
+  <rect x="60" y="80" width="100" height="6" rx="3" fill="#4A6FA5" opacity="0.5"/>
+  <rect x="60" y="110" width="680" height="1" fill="#4A6FA5" opacity="0.3"/>
+  <rect x="60" y="130" width="320" height="200" rx="6" fill="#1E3A5F"/>
+  <rect x="400" y="130" width="340" height="90" rx="6" fill="#1E3A5F"/>
+  <rect x="400" y="240" width="340" height="90" rx="6" fill="#1E3A5F"/>
+  <rect x="60" y="350" width="680" height="80" rx="6" fill="#1E3A5F"/>
+  <circle cx="220" cy="230" r="60" fill="#0B2545" stroke="#C9A227" stroke-width="2"/>
+  <text x="220" y="235" text-anchor="middle" font-family="sans-serif" font-size="18" fill="#C9A227" font-weight="bold">72%</text>
+  <text x="570" y="280" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#4A6FA5">NGO Grant Tracking</text>
+  <text x="400" y="560" text-anchor="middle" font-family="Georgia, serif" font-size="16" fill="#C9A227" font-weight="bold">TrueWorks</text>
+</svg>

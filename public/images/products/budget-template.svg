@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+  <rect width="800" height="600" fill="#0B2545"/>
+  <rect x="40" y="40" width="720" height="520" rx="8" fill="#132D4A"/>
+  <rect x="60" y="60" width="200" height="8" rx="4" fill="#C9A227"/>
+  <rect x="60" y="80" width="140" height="6" rx="3" fill="#4A6FA5" opacity="0.5"/>
+  <rect x="60" y="110" width="680" height="1" fill="#4A6FA5" opacity="0.3"/>
+  <rect x="60" y="130" width="680" height="60" rx="6" fill="#1E3A5F"/>
+  <rect x="80" y="145" width="80" height="30" rx="4" fill="#0B2545"/>
+  <rect x="170" y="145" width="80" height="30" rx="4" fill="#0B2545"/>
+  <rect x="260" y="145" width="80" height="30" rx="4" fill="#C9A227"/>
+  <rect x="60" y="210" width="330" height="180" rx="6" fill="#1E3A5F"/>
+  <rect x="410" y="210" width="330" height="80" rx="6" fill="#1E3A5F"/>
+  <rect x="410" y="310" width="330" height="80" rx="6" fill="#1E3A5F"/>
+  <rect x="60" y="410" width="680" height="60" rx="6" fill="#1E3A5F"/>
+  <text x="400" y="560" text-anchor="middle" font-family="Georgia, serif" font-size="16" fill="#C9A227" font-weight="bold">TrueWorks</text>
+</svg>
