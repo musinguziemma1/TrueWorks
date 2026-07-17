@@ -17,6 +17,8 @@ export interface Product {
   version: string;
   changelog: string;
   demoUrl?: string;
+  whatsInside?: string[];
+  fileCompatibility?: string;
   faq: FAQ[];
   relatedProducts: string[];
   seoTitle: string;

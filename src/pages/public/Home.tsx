@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowRight, Download, ShieldCheck, Zap, Building2, HeartPulse,
   TrendingUp, HandHeart, GraduationCap, Church,
@@ -53,110 +53,341 @@ const showcaseProducts = [
   { name: 'NGO Grant System', metrics: ['Donor Tracking', 'Budget vs Actual', 'Compliance Reports', 'Grant Pipeline'], color: 'from-purple-500 to-violet-600' },
 ];
 
+const heroSlides = [
+  {
+    badge: 'Premium institutional templates',
+    title: (
+      <>
+        The workbook your board{' '}
+        <em className="text-accent not-italic" style={{ fontStyle: 'italic' }}>thinks</em>{' '}
+        you paid a firm to build.
+      </>
+    ),
+    description: 'Institution-grade Excel templates, financial models, dashboards and business systems. Built for hospitals, NGOs, churches, schools and growing businesses across East Africa.',
+    cta: 'Explore collections',
+    visual: 'table' as const,
+  },
+  {
+    badge: 'Healthcare analytics suite',
+    title: 'Hospital dashboards that give you real-time control.',
+    description: 'Track bed occupancy, revenue per bed, patient satisfaction, and staff productivity — all from one Excel dashboard built for Ugandan healthcare facilities.',
+    cta: 'View hospital templates',
+    visual: 'healthcare' as const,
+  },
+  {
+    badge: 'Non-profit financial tools',
+    title: 'Grant management systems donors trust.',
+    description: 'Track multiple grants, manage donor relationships, and generate USAID/EU/UN compliance reports without expensive ERP software.',
+    cta: 'Explore NGO solutions',
+    visual: 'ngo' as const,
+  },
+  {
+    badge: 'Built for growing businesses',
+    title: 'Financial models that scale with your SME.',
+    description: 'Professional budgeting, forecasting, cash flow management, and HR systems purpose-built for East African businesses.',
+    cta: 'Browse business templates',
+    visual: 'business' as const,
+  },
+];
+
 export function Home() {
   const { addItem } = useCartStore();
   const [freeName, setFreeName] = useState('');
   const [email, setEmail] = useState('');
+  const [slide, setSlide] = useState(0);
   const featuredProducts = useQuery(api.products.getFeatured, { limit: 4 });
   const testimonials = useQuery(api.reviews.list, { approved: true, featured: true, limit: 3 });
   const reviewStats = useQuery(api.reviews.getStats);
 
+  const nextSlide = useCallback(() => setSlide(p => (p + 1) % heroSlides.length), []);
+
+  useEffect(() => {
+    const timer = setInterval(nextSlide, 15000);
+    return () => clearInterval(timer);
+  }, [nextSlide]);
+
   return (
     <div>
       {/* Hero */}
-      <section className="relative min-h-[90vh] flex items-center bg-gradient-to-br from-primary via-primary-light to-[#0A1E3D] overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(74,111,165,0.15),transparent_50%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(201,162,39,0.08),transparent_50%)]" />
-        <div className="absolute top-20 left-10 w-72 h-72 border border-white/5 rounded-full" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 border border-white/5 rounded-full" />
-        <div className="relative max-w-7xl mx-auto px-4 md:px-6 pt-24 pb-16 md:pt-32 md:pb-20">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/10 mb-6">
-                <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-                <span className="text-sm text-white/80 font-medium">Trusted by 50+ organizations</span>
-              </div>
-              <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight text-balance">
-                Building Better{' '}
-                <span className="text-accent">Organizations</span>
-              </h1>
-              <p className="text-lg md:text-xl text-white/70 leading-relaxed mb-8 max-w-xl">
-                Premium Excel templates, financial models, dashboards and business systems built for hospitals, NGOs, churches, schools and growing businesses.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link to="/store">
-                  <Button variant="accent" size="lg">
-                    Browse Store
-                    <ArrowRight className="w-5 h-5" />
-                  </Button>
-                </Link>
-                <Button variant="outline" size="lg" className="border-white/20 text-white hover:bg-white/10">
-                  <Download className="w-5 h-5" />
-                  Free Template
-                </Button>
-              </div>
-              <div className="flex items-center gap-4 mt-8 pt-8 border-t border-white/10">
-                <div className="flex -space-x-2">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="w-8 h-8 rounded-full bg-gradient-to-br from-secondary to-primary border-2 border-primary flex items-center justify-center text-[10px] text-white font-bold">
-                      U{i}
-                    </div>
-                  ))}
-                </div>
-                <p className="text-sm text-white/50">Join <span className="text-white font-semibold">50+</span> organizations already building better</p>
-              </div>
-            </motion.div>
+      <section className="relative min-h-[90vh] flex items-center overflow-hidden" style={{ background: 'linear-gradient(135deg, #060D1A 0%, #0B1A35 35%, #0F2244 65%, #0B2545 100%)' }}>
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(74,111,165,0.12),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(201,162,39,0.06),transparent_50%)]" />
+        <motion.div
+          className="absolute top-20 left-10 w-72 h-72 border border-white/[0.04] rounded-full"
+          animate={{ rotate: 360 }}
+          transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
+        />
+        <motion.div
+          className="absolute bottom-20 right-10 w-96 h-96 border border-white/[0.04] rounded-full"
+          animate={{ rotate: -360 }}
+          transition={{ duration: 50, repeat: Infinity, ease: 'linear' }}
+        />
+        <motion.div
+          className="absolute top-1/3 right-1/4 w-48 h-48 border border-accent/[0.03] rounded-full"
+          animate={{ rotate: 360, scale: [1, 1.05, 1] }}
+          transition={{ rotate: { duration: 30, repeat: Infinity, ease: 'linear' }, scale: { duration: 4, repeat: Infinity, ease: 'easeInOut' } }}
+        />
+        <div className="relative max-w-7xl mx-auto px-4 md:px-6 pt-24 pb-16 md:pt-32 md:pb-20 w-full">
+          <AnimatePresence mode="wait">
             <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="relative hidden lg:block"
+              key={slide}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.5 }}
+              className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center"
             >
-              <div className="relative aspect-[4/3] rounded-2xl bg-white/5 border border-white/10 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/50 to-transparent" />
-                <div className="absolute inset-4 rounded-xl bg-white/10 border border-white/10 overflow-hidden">
-                  <div className="h-8 bg-white/10 flex items-center px-3 gap-2">
-                    <div className="w-2 h-2 rounded-full bg-red-400" />
-                    <div className="w-2 h-2 rounded-full bg-yellow-400" />
-                    <div className="w-2 h-2 rounded-full bg-green-400" />
-                    <div className="ml-4 flex gap-1">
-                      <div className="w-16 h-2 rounded bg-white/10" />
-                      <div className="w-12 h-2 rounded bg-white/10" />
-                    </div>
-                  </div>
-                  <div className="p-3 space-y-2">
-                    <div className="flex gap-2">
-                      <div className="flex-1 space-y-2">
-                        <div className="h-4 rounded bg-accent/20 w-3/4" />
-                        <div className="h-3 rounded bg-white/10 w-1/2" />
-                        <div className="grid grid-cols-3 gap-2 mt-4">
-                          {[45, 92, 78].map((v, i) => (
-                            <div key={i} className="p-2 rounded bg-white/5">
-                              <div className="h-6 font-heading font-bold text-accent text-sm">{v}%</div>
-                              <div className="h-2 rounded bg-white/10 mt-1" />
-                            </div>
-                          ))}
-                        </div>
-                        <div className="h-20 rounded bg-white/5 mt-2" />
-                      </div>
-                      <div className="w-24 space-y-2">
-                        <div className="h-3 rounded bg-white/10" />
-                        <div className="h-3 rounded bg-white/10" />
-                        <div className="h-3 rounded bg-white/10" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="absolute -bottom-4 -right-4 w-32 h-20 rounded-lg bg-accent/20 border border-accent/30 backdrop-blur-sm p-3">
-                  <div className="text-accent font-heading font-bold text-lg">+45%</div>
-                  <div className="text-white/60 text-[10px]">Efficiency Gain</div>
-                </div>
-                <div className="absolute -top-4 -left-4 w-28 h-16 rounded-lg bg-white/10 border border-white/20 backdrop-blur-sm p-3">
-                  <div className="text-white font-heading font-bold text-sm">98%</div>
-                  <div className="text-white/60 text-[10px]">Accuracy</div>
+              <div>
+                <motion.div
+                  className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.07] border border-white/[0.08] mb-6"
+                  animate={{ borderColor: ['rgba(255,255,255,0.08)', 'rgba(201,162,39,0.3)', 'rgba(255,255,255,0.08)'] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                  <motion.span
+                    className="w-2 h-2 rounded-full bg-accent"
+                    animate={{ scale: [1, 1.4, 1], opacity: [1, 0.6, 1] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                  />
+                  <span className="text-sm text-white/70 font-medium">{heroSlides[slide].badge}</span>
+                </motion.div>
+                <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight text-balance">
+                  {heroSlides[slide].title}
+                </h1>
+                <p className="text-lg md:text-xl text-white/60 leading-relaxed mb-8 max-w-xl">
+                  {heroSlides[slide].description}
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Link to="/store">
+                    <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                      <Button variant="accent" size="lg">
+                        {heroSlides[slide].cta}
+                        <ArrowRight className="w-5 h-5" />
+                      </Button>
+                    </motion.div>
+                  </Link>
+                  <Link to="/store">
+                    <Button variant="outline" size="lg" className="border-white/20 text-white hover:bg-white/10">
+                      Browse all templates
+                    </Button>
+                  </Link>
                 </div>
               </div>
+              <div className="relative hidden lg:block">
+                {heroSlides[slide].visual === 'table' && (
+                  <motion.div
+                    className="rounded-xl bg-white/[0.04] border border-white/[0.08] overflow-hidden backdrop-blur-sm"
+                    animate={{ y: [0, -6, 0] }}
+                    transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+                  >
+                    <div className="px-5 py-3 border-b border-white/[0.08] flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-red-400" />
+                      <div className="w-2 h-2 rounded-full bg-yellow-400" />
+                      <div className="w-2 h-2 rounded-full bg-green-400" />
+                      <span className="ml-3 text-xs text-white/40 font-medium">FY 2025 / 26</span>
+                    </div>
+                    <div className="p-0">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="border-b border-white/[0.08]">
+                            <th className="text-left px-5 py-3 text-white/50 font-medium text-xs uppercase tracking-wider">Service Line</th>
+                            <th className="text-right px-5 py-3 text-white/50 font-medium text-xs uppercase tracking-wider">Revenue</th>
+                            <th className="text-right px-5 py-3 text-white/50 font-medium text-xs uppercase tracking-wider">Margin</th>
+                            <th className="text-center px-5 py-3 text-white/50 font-medium text-xs uppercase tracking-wider">RAG</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {[
+                            { name: 'Advisory', revenue: '4,250,000', margin: '72%', rag: 'green' },
+                            { name: 'Templates', revenue: '2,800,000', margin: '85%', rag: 'green' },
+                            { name: 'Training', revenue: '1,600,000', margin: '58%', rag: 'amber' },
+                            { name: 'Retainers', revenue: '3,100,000', margin: '64%', rag: 'green' },
+                            { name: 'Custom Builds', revenue: '5,400,000', margin: '51%', rag: 'amber' },
+                          ].map((row, i) => (
+                            <motion.tr
+                              key={i}
+                              initial={{ opacity: 0, x: -10 }}
+                              animate={{ opacity: 1, x: 0 }}
+                              transition={{ delay: 0.5 + i * 0.08, duration: 0.4 }}
+                              className="border-b border-white/[0.05] hover:bg-white/[0.05] transition-colors"
+                            >
+                              <td className="px-5 py-3 text-white/80 font-medium">{row.name}</td>
+                              <td className="px-5 py-3 text-white/60 text-right font-mono">UGX {row.revenue}</td>
+                              <td className="px-5 py-3 text-white/60 text-right font-mono">{row.margin}</td>
+                              <td className="px-5 py-3 text-center">
+                                <motion.span
+                                  className="inline-block w-2.5 h-2.5 rounded-full"
+                                  animate={{ scale: [1, 1.3, 1], opacity: [0.7, 1, 0.7] }}
+                                  transition={{ duration: 2, delay: i * 0.3, repeat: Infinity, ease: 'easeInOut' }}
+                                  style={{ backgroundColor: row.rag === 'green' ? '#34d399' : row.rag === 'amber' ? '#fbbf24' : '#f87171' }}
+                                />
+                              </td>
+                            </motion.tr>
+                          ))}
+                        </tbody>
+                        <tfoot>
+                          <tr className="border-t border-white/[0.1]">
+                            <td className="px-5 py-3 text-white font-semibold">Total</td>
+                            <td className="px-5 py-3 text-accent text-right font-mono font-semibold">UGX 17,150,000</td>
+                            <td className="px-5 py-3 text-white/60 text-right font-mono">65%</td>
+                            <td />
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  </motion.div>
+                )}
+                {heroSlides[slide].visual === 'healthcare' && (
+                  <motion.div
+                    className="rounded-xl bg-white/[0.04] border border-white/[0.08] overflow-hidden backdrop-blur-sm p-6"
+                    animate={{ y: [0, -6, 0] }}
+                    transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+                  >
+                    <div className="flex items-center gap-3 mb-5">
+                      <HeartPulse className="w-8 h-8 text-accent" />
+                      <span className="text-white/50 text-xs uppercase tracking-wider font-semibold">Live KPI Dashboard</span>
+                    </div>
+                    <div className="space-y-3">
+                      {[
+                        { label: 'Bed Occupancy', value: '78%', change: '+5%', up: true },
+                        { label: 'Revenue per Bed', value: 'UGX 840K', change: '+12%', up: true },
+                        { label: 'Patient Satisfaction', value: '92%', change: '+3%', up: true },
+                        { label: 'Staff Efficiency', value: '86%', change: '-2%', up: false },
+                      ].map((metric, i) => (
+                        <motion.div
+                          key={metric.label}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.4 + i * 0.08 }}
+                          className="flex items-center justify-between py-2 border-b border-white/[0.05] last:border-0"
+                        >
+                          <span className="text-white/70 text-sm">{metric.label}</span>
+                          <div className="flex items-center gap-3">
+                            <span className="text-white font-semibold font-mono text-sm">{metric.value}</span>
+                            <span className={`text-xs font-medium ${metric.up ? 'text-emerald-400' : 'text-red-400'}`}>{metric.change}</span>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+                {heroSlides[slide].visual === 'ngo' && (
+                  <motion.div
+                    className="rounded-xl bg-white/[0.04] border border-white/[0.08] overflow-hidden backdrop-blur-sm p-6"
+                    animate={{ y: [0, -6, 0] }}
+                    transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+                  >
+                    <div className="flex items-center gap-3 mb-5">
+                      <HandHeart className="w-8 h-8 text-accent" />
+                      <span className="text-white/50 text-xs uppercase tracking-wider font-semibold">Grant Overview</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      {[
+                        { label: 'Active Grants', value: '12' },
+                        { label: 'Total Funding', value: 'UGX 4.2B' },
+                        { label: 'Compliance Rate', value: '96%' },
+                        { label: 'Disbursed', value: 'UGX 3.1B' },
+                      ].map((stat, i) => (
+                        <motion.div
+                          key={stat.label}
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.3 + i * 0.08 }}
+                          className="p-3 rounded-lg bg-white/[0.06]"
+                        >
+                          <p className="text-white/50 text-xs">{stat.label}</p>
+                          <p className="text-white font-bold font-heading text-lg">{stat.value}</p>
+                        </motion.div>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-white/40">
+                      <div className="w-2 h-2 rounded-full bg-emerald-400" />
+                      Next reporting deadline: 15 Aug 2026
+                    </div>
+                  </motion.div>
+                )}
+                {heroSlides[slide].visual === 'business' && (
+                  <motion.div
+                    className="rounded-xl bg-white/[0.04] border border-white/[0.08] overflow-hidden backdrop-blur-sm p-6"
+                    animate={{ y: [0, -6, 0] }}
+                    transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
+                  >
+                    <div className="flex items-center gap-3 mb-5">
+                      <Building2 className="w-8 h-8 text-accent" />
+                      <span className="text-white/50 text-xs uppercase tracking-wider font-semibold">Financial Snapshot</span>
+                    </div>
+                    <div className="space-y-3">
+                      {[
+                        { label: 'Revenue (YTD)', value: 'UGX 286M' },
+                        { label: 'Gross Margin', value: '64%' },
+                        { label: 'Cash on Hand', value: 'UGX 42M' },
+                        { label: 'Budget Utilization', value: '73%' },
+                      ].map((fin, i) => (
+                        <motion.div
+                          key={fin.label}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 0.3 + i * 0.08 }}
+                          className="flex items-center justify-between py-2 border-b border-white/[0.05] last:border-0"
+                        >
+                          <span className="text-white/70 text-sm">{fin.label}</span>
+                          <span className="text-white font-semibold font-mono text-sm">{fin.value}</span>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </div>
             </motion.div>
+          </AnimatePresence>
+
+          {/* Slide dots */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
+            {heroSlides.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setSlide(i)}
+                className={`w-2 h-2 rounded-full transition-all duration-500 ${
+                  i === slide ? 'bg-accent w-6' : 'bg-white/30 hover:bg-white/50'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Feature Badges Banner */}
+      <section className="bg-[#0A1529] border-b border-white/[0.06] overflow-hidden relative">
+        <motion.div
+          className="absolute inset-0 w-full h-full"
+          animate={{ backgroundPosition: ['0% 0%', '100% 0%'] }}
+          transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+          style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(201,162,39,0.04) 50%, transparent 100%)', backgroundSize: '200% 100%' }}
+        />
+        <div className="max-w-7xl mx-auto px-4 md:px-6 relative">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-0 divide-x divide-white/[0.08]">
+            {[
+              'Formula-audited',
+              'Driver-based',
+              'Board-finished',
+              'Yours outright',
+            ].map((badge, i) => (
+              <motion.div
+                key={badge}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className="flex items-center justify-center gap-2.5 py-4 md:py-5"
+              >
+                <motion.div
+                  animate={{ scale: [1, 1.15, 1] }}
+                  transition={{ duration: 2, delay: i * 0.4, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                  <CheckCircle className="w-4 h-4 text-accent flex-shrink-0" />
+                </motion.div>
+                <span className="text-sm text-white/70 font-medium">{badge}</span>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
@@ -302,17 +533,24 @@ export function Home() {
             ))}
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {testimonials.map((t) => (
-              <TestimonialCard
-                key={t._id}
-                name={t.customerName}
-                role="Customer"
-                company="TrueWorks"
-                quote={t.content}
-                rating={t.rating}
-              />
-            ))}
+          <div className="relative overflow-hidden">
+            <motion.div
+              className="flex gap-6"
+              animate={{ x: ['0%', '-50%'] }}
+              transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
+            >
+              {[...testimonials, ...testimonials].map((t, i) => (
+                <div key={`${t._id}-${i}`} className="flex-shrink-0 w-[350px]">
+                  <TestimonialCard
+                    name={t.customerName}
+                    role="Customer"
+                    company="TrueWorks"
+                    quote={t.content}
+                    rating={t.rating}
+                  />
+                </div>
+              ))}
+            </motion.div>
           </div>
         )}
       </Section>

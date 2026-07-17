@@ -136,6 +136,8 @@ export function AdminProducts() {
         version: data.version || '1.0',
         changelog: data.changelog || '',
         demoUrl: data.demoUrl,
+        whatsInside: data.whatsInside || [],
+        fileCompatibility: data.fileCompatibility || '',
         faq: data.faq || [],
         seoTitle: data.seoTitle || '',
         seoDescription: data.seoDescription || '',

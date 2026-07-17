@@ -34,6 +34,11 @@ export function Header() {
         scrolled ? 'bg-white/90 backdrop-blur-md shadow-sm' : 'bg-transparent'
       )}
     >
+      {/* Gold accent line */}
+      <div className={cn(
+        'h-[2px] bg-gradient-to-r from-transparent via-accent to-transparent transition-opacity duration-300',
+        scrolled ? 'opacity-0' : 'opacity-100'
+      )} />
       <div className="max-w-7xl mx-auto px-4 md:px-6">
         <div className="flex items-center justify-between h-16 md:h-20">
           <Link to="/" className="flex items-center gap-2.5 group">

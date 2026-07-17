@@ -7,9 +7,12 @@ import { Footer } from './components/layout/Footer';
 import { AdminLayout } from './components/admin/AdminLayout';
 import { NewsletterModal } from './components/ui/NewsletterModal';
 import { convexClient } from './lib/convexClient';
+import { useAnalytics } from './hooks/useAnalytics';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 // Lazy-loaded public pages
 const Home = lazy(() => import('./pages/public/Home').then(m => ({ default: m.Home })));
+const BlogPost = lazy(() => import('./pages/public/BlogPost').then(m => ({ default: m.BlogPost })));
 const Store = lazy(() => import('./pages/public/Store').then(m => ({ default: m.Store })));
 const ProductDetail = lazy(() => import('./pages/public/ProductDetail').then(m => ({ default: m.ProductDetail })));
 const About = lazy(() => import('./pages/public/About').then(m => ({ default: m.About })));
@@ -66,9 +69,15 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
+function AnalyticsTracker() {
+  useAnalytics();
+  return null;
+}
+
 function AppContent() {
   return (
     <BrowserRouter>
+      <AnalyticsTracker />
       <Toaster
         position="top-right"
         toastOptions={{
@@ -88,6 +97,7 @@ function AppContent() {
           <Route path="/product/:slug" element={<PublicLayout><ProductDetail /></PublicLayout>} />
           <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
           <Route path="/resources" element={<PublicLayout><Resources /></PublicLayout>} />
+          <Route path="/resources/:slug" element={<PublicLayout><BlogPost /></PublicLayout>} />
           <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
           <Route path="/cart" element={<PublicLayout><Cart /></PublicLayout>} />
           <Route path="/checkout" element={<PublicLayout><Checkout /></PublicLayout>} />
@@ -105,7 +115,7 @@ function AppContent() {
             <Route path="customers" element={<AdminCustomers />} />
             <Route path="downloads" element={<AdminDownloads />} />
             <Route path="categories" element={<AdminCategories />} />
-            <Route path="coupons" element={<AdminCoupons />} />
+            <Route path="coupons" element={<ErrorBoundary><AdminCoupons /></ErrorBoundary>} />
             <Route path="content" element={<AdminContent />} />
             <Route path="media" element={<AdminMedia />} />
             <Route path="email" element={<AdminEmail />} />

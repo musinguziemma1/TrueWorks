@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Search, Clock, ArrowRight, FileText, BookOpen, Download, BarChart3 } from 'lucide-react';
 import { Section, SectionHeader } from '../../components/ui/Section';
@@ -65,32 +66,33 @@ export function Resources() {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredPosts.map((post: any, idx: number) => (
-            <motion.article
-              key={post._id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.05 }}
-              className="group rounded-lg border border-border bg-white overflow-hidden hover:shadow-card-hover transition-all"
-            >
-              <div className="aspect-[16/9] bg-gradient-to-br from-section to-section-alt flex items-center justify-center">
-                <BookOpen className="w-12 h-12 text-text-muted/40" />
-              </div>
-              <div className="p-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <Badge variant="primary">{post.category}</Badge>
-                  <span className="flex items-center gap-1 text-xs text-text-muted">
-                    <Clock className="w-3 h-3" />
-                    {post.readingTime} min read
-                  </span>
+            <Link key={post._id} to={`/resources/${post.slug}`}>
+              <motion.article
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: idx * 0.05 }}
+                className="group rounded-lg border border-border bg-white overflow-hidden hover:shadow-card-hover transition-all"
+              >
+                <div className="aspect-[16/9] bg-gradient-to-br from-section to-section-alt flex items-center justify-center">
+                  <BookOpen className="w-12 h-12 text-text-muted/40" />
                 </div>
-                <h3 className="font-heading font-bold text-primary mb-2 group-hover:text-accent transition-colors">{post.title}</h3>
-                <p className="text-sm text-text-secondary mb-4 line-clamp-2">{post.excerpt}</p>
-                <Button variant="ghost" size="sm">
-                  Read More <ArrowRight className="w-3 h-3" />
-                </Button>
-              </div>
-            </motion.article>
+                <div className="p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Badge variant="primary">{post.category}</Badge>
+                    <span className="flex items-center gap-1 text-xs text-text-muted">
+                      <Clock className="w-3 h-3" />
+                      {post.readingTime} min read
+                    </span>
+                  </div>
+                  <h3 className="font-heading font-bold text-primary mb-2 group-hover:text-accent transition-colors">{post.title}</h3>
+                  <p className="text-sm text-text-secondary mb-4 line-clamp-2">{post.excerpt}</p>
+                  <Button variant="ghost" size="sm">
+                    Read More <ArrowRight className="w-3 h-3" />
+                  </Button>
+                </div>
+              </motion.article>
+            </Link>
           ))}
         </div>
       </Section>
@@ -116,10 +118,10 @@ export function Resources() {
               <Badge variant="accent" size="sm" className="mb-2 capitalize">{resource.type.replace('_', ' ')}</Badge>
               <h3 className="font-heading font-bold text-primary mb-2">{resource.title}</h3>
               <p className="text-sm text-text-secondary mb-4">{resource.description}</p>
-              <Button variant="ghost" size="sm">
+              <a href={resource.url} className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:text-accent/80 transition-colors">
                 {resource.type === 'template' ? 'Download' : 'Read More'}
                 <ArrowRight className="w-3 h-3" />
-              </Button>
+              </a>
             </motion.div>
           ))}
         </div>

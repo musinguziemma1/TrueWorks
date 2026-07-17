@@ -20,6 +20,8 @@ export default defineSchema({
     version: v.string(),
     changelog: v.string(),
     demoUrl: v.optional(v.string()),
+    whatsInside: v.optional(v.array(v.string())),
+    fileCompatibility: v.optional(v.string()),
     faq: v.array(v.object({
       question: v.string(),
       answer: v.string(),

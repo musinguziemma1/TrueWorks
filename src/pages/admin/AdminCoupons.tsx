@@ -27,17 +27,17 @@ export function AdminCoupons() {
     }));
   }, [coupons]);
 
+  const stats = useMemo(() => {
+    if (!coupons) return { active: 0, totalUsed: 0, discountGiven: 89000, avgDiscount: 0 };
+    const active = coupons.filter(c => c.active);
+    const totalUsed = coupons.reduce((s, c) => s + c.usageCount, 0);
+    const avgDiscount = active.length > 0 ? Math.round(active.reduce((s, c) => s + c.value, 0) / active.length) : 0;
+    return { active: active.length, totalUsed, discountGiven: 89000, avgDiscount };
+  }, [coupons]);
+
   if (coupons === undefined) {
     return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
   }
-
-  const stats = useMemo(() => {
-    const active = coupons.filter(c => c.active);
-    const totalUsed = coupons.reduce((s, c) => s + c.usageCount, 0);
-    const discountGiven = 89000;
-    const avgDiscount = active.length > 0 ? Math.round(active.reduce((s, c) => s + c.value, 0) / active.length) : 0;
-    return { active: active.length, totalUsed, discountGiven, avgDiscount };
-  }, [coupons]);
 
   const columns: Column<CouponRow>[] = [
     { key: 'code', label: 'Code', render: (c) => (

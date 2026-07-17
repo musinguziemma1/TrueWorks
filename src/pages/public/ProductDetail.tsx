@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import {
   ShoppingCart, Heart, Share2, ChevronDown, Download,
   FileType, Layers, Star, ShieldCheck, Clock, RefreshCw,
+  Monitor, CheckCircle2, ExternalLink, FileText,
   Minus, Plus, ChevronRight
 } from 'lucide-react';
 import { useQuery } from 'convex/react';
@@ -22,6 +23,7 @@ export function ProductDetail() {
   const product = useQuery(api.products.getBySlug, { slug: slug || '' });
   const [activeTab, setActiveTab] = useState<'features' | 'faq' | 'reviews'>('features');
   const [quantity, setQuantity] = useState(1);
+  const [selectedImage, setSelectedImage] = useState(0);
   const reviews = useQuery(api.reviews.list, product ? { productId: product._id } : 'skip');
   const relatedItems = useQuery(api.products.getRelated, product ? { productId: product._id } : 'skip');
 
@@ -39,6 +41,7 @@ export function ProductDetail() {
   }
 
   const inCart = items.find(i => i.product._id === product._id);
+  const images = product.images.length > 0 ? product.images : null;
 
   return (
     <div className="pt-24 md:pt-28">
@@ -59,16 +62,24 @@ export function ProductDetail() {
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
           {/* Gallery */}
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
-            <div className="aspect-[4/3] rounded-xl bg-gradient-to-br from-section to-section-alt border border-border overflow-hidden relative">
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-primary/10 flex items-center justify-center">
-                    <FileType className="w-10 h-10 text-primary" />
+            <div className="aspect-[4/3] rounded-xl bg-gradient-to-br from-section to-section-alt border border-border overflow-hidden relative group">
+              {images ? (
+                <img
+                  src={images[selectedImage]}
+                  alt={`${product.name} screenshot ${selectedImage + 1}`}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-primary/10 flex items-center justify-center">
+                      <FileType className="w-10 h-10 text-primary" />
+                    </div>
+                    <p className="text-sm text-text-muted font-medium">{product.fileType}</p>
+                    <p className="text-xs text-text-muted mt-1">v{product.version}</p>
                   </div>
-                  <p className="text-sm text-text-muted font-medium">{product.fileType}</p>
-                  <p className="text-xs text-text-muted mt-1">v{product.version}</p>
                 </div>
-              </div>
+              )}
               {product.salePrice && (
                 <div className="absolute top-4 left-4 z-10">
                   <Badge variant="accent">Sale</Badge>
@@ -83,11 +94,22 @@ export function ProductDetail() {
                 </button>
               </div>
             </div>
-            <div className="grid grid-cols-4 gap-3">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="aspect-[4/3] rounded-lg bg-section border border-border hover:border-secondary transition-colors cursor-pointer" />
-              ))}
-            </div>
+            {images && (
+              <div className="grid grid-cols-4 gap-3">
+                {images.map((img, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setSelectedImage(i)}
+                    className={cn(
+                      'aspect-[4/3] rounded-lg border overflow-hidden transition-colors',
+                      selectedImage === i ? 'border-secondary ring-2 ring-secondary/20' : 'border-border hover:border-secondary'
+                    )}
+                  >
+                    <img src={img} alt="" className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
           </motion.div>
 
           {/* Product Info */}
@@ -129,6 +151,14 @@ export function ProductDetail() {
                   <Plus className="w-4 h-4" />
                 </button>
               </div>
+              {product.demoUrl && (
+                <a href={product.demoUrl} target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" size="lg">
+                    <Monitor className="w-5 h-5" />
+                    Live Demo
+                  </Button>
+                </a>
+              )}
               <Button
                 variant="primary"
                 size="lg"
@@ -165,6 +195,10 @@ export function ProductDetail() {
                 <span><strong className="text-text-primary">File Type:</strong> {product.fileType}</span>
               </div>
               <div className="flex items-center gap-3 text-text-secondary">
+                <Monitor className="w-4 h-4" />
+                <span><strong className="text-text-primary">Compatibility:</strong> {product.fileCompatibility || 'N/A'}</span>
+              </div>
+              <div className="flex items-center gap-3 text-text-secondary">
                 <Layers className="w-4 h-4" />
                 <span><strong className="text-text-primary">Version:</strong> {product.version}</span>
               </div>
@@ -173,6 +207,21 @@ export function ProductDetail() {
                 <span><strong className="text-text-primary">Updated:</strong> {new Date(product._creationTime).toLocaleDateString()}</span>
               </div>
             </div>
+
+            {/* Downloadable Files */}
+            {product.downloadableFiles.length > 0 && (
+              <div className="mt-6 p-4 rounded-lg bg-white border border-border">
+                <p className="text-sm font-semibold text-text-primary mb-2">Files Included ({product.downloadableFiles.length})</p>
+                <ul className="space-y-1">
+                  {product.downloadableFiles.map((file, i) => (
+                    <li key={i} className="flex items-center gap-2 text-sm text-text-secondary">
+                      <FileText className="w-3.5 h-3.5 text-accent" />
+                      {file}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </motion.div>
         </div>
       </div>
@@ -180,13 +229,13 @@ export function ProductDetail() {
       {/* Tabs */}
       <Section variant="section">
         <div className="max-w-4xl mx-auto">
-          <div className="flex border-b border-border mb-8">
+          <div className="flex border-b border-border mb-8 overflow-x-auto">
             {(['features', 'faq', 'reviews'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={cn(
-                  'px-6 py-3 text-sm font-semibold capitalize border-b-2 transition-colors',
+                  'px-6 py-3 text-sm font-semibold capitalize border-b-2 whitespace-nowrap transition-colors',
                   activeTab === tab ? 'border-accent text-primary' : 'border-transparent text-text-muted hover:text-text-secondary'
                 )}
               >
@@ -196,10 +245,30 @@ export function ProductDetail() {
           </div>
 
           {activeTab === 'features' && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-              <p className="text-text-secondary leading-relaxed mb-6">{product.description}</p>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+              {/* What's Inside */}
+              {product.whatsInside && product.whatsInside.length > 0 && (
+                <div className="mb-8">
+                  <h3 className="font-heading text-lg font-bold text-primary mb-4">What's Inside</h3>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    {product.whatsInside.map((item, i) => (
+                      <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-white border border-border">
+                        <CheckCircle2 className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
+                        <span className="text-sm text-text-secondary">{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Description */}
+              <div className="space-y-4">
+                <h3 className="font-heading text-lg font-bold text-primary">Description</h3>
+                <div className="text-text-secondary leading-relaxed" dangerouslySetInnerHTML={{ __html: product.description.replace(/\n/g, '<br/>') }} />
+              </div>
+
               {product.changelog && (
-                <div className="p-4 rounded-lg bg-white border border-border">
+                <div className="mt-6 p-4 rounded-lg bg-white border border-border">
                   <p className="text-sm font-semibold text-text-primary mb-1">Latest Update</p>
                   <p className="text-sm text-text-secondary">{product.changelog}</p>
                 </div>
