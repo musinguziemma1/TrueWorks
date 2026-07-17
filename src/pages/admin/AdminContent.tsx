@@ -1,8 +1,41 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Plus, Edit, Trash2, Search, Eye, Globe, Layout } from 'lucide-react';
+import { FileText, Plus, Edit, Trash2, Search, Eye, Globe, Layout, Store, BookOpen, ShieldCheck, Sparkles, CheckCircle, LayoutDashboard } from 'lucide-react';
+import { useQuery, useMutation } from 'convex/react';
+import { api } from '../../../convex/_generated/api';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
+
+const layouts = [
+  {
+    id: 'original' as const,
+    label: 'Original',
+    icon: LayoutDashboard,
+    description: 'The original homepage: full hero carousel, badge bar, trusted by, featured products, industries, testimonials, stats, and CTA sections.',
+    color: 'from-slate-600 to-slate-700',
+  },
+  {
+    id: 'showroom' as const,
+    label: 'Showroom',
+    icon: Store,
+    description: 'Product-first layout with compact hero, category grid, and stacked sections. Best for driving sales.',
+    color: 'from-blue-500 to-indigo-600',
+  },
+  {
+    id: 'editorial' as const,
+    label: 'Editorial',
+    icon: BookOpen,
+    description: 'Narrative-driven layout with storytelling flow, case study, and "why now" closing. Best for brand building.',
+    color: 'from-emerald-500 to-teal-600',
+  },
+  {
+    id: 'trust' as const,
+    label: 'Trust & Authority',
+    icon: ShieldCheck,
+    description: 'Credibility-first layout with prominent testimonials, stats wall, and trust markers. Best for conversions.',
+    color: 'from-purple-500 to-violet-600',
+  },
+];
 
 const sections = [
   { id: 'hero', label: 'Hero Section', type: 'Homepage Hero', status: 'published', lastEdited: '2 days ago' },
@@ -15,6 +48,18 @@ const sections = [
 
 export function AdminContent() {
   const [query, setQuery] = useState('');
+  const currentLayout = useQuery(api.settings.getHomeLayout);
+  const updateLayout = useMutation(api.settings.updateHomeLayout);
+  const [saving, setSaving] = useState(false);
+
+  const handleSelectLayout = async (id: 'original' | 'showroom' | 'editorial' | 'trust') => {
+    setSaving(true);
+    try {
+      await updateLayout({ layout: id });
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div>
@@ -28,6 +73,69 @@ export function AdminContent() {
           <Button size="sm"><Plus className="w-4 h-4" /> New Page</Button>
         </div>
       </div>
+
+      {/* Home Page Layout Selector */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-8 p-6 rounded-xl border border-border bg-white"
+      >
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
+            <Layout className="w-5 h-5 text-accent" />
+          </div>
+          <div>
+            <h2 className="font-heading font-bold text-primary">Home Page Layout</h2>
+            <p className="text-sm text-text-muted">Choose how your homepage appears to visitors</p>
+          </div>
+          {currentLayout && (
+            <Badge variant="success" className="ml-auto">
+              <Sparkles className="w-3 h-3" />
+              Active: {layouts.find(l => l.id === currentLayout)?.label ?? currentLayout}
+            </Badge>
+          )}
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-4">
+          {layouts.map((layout) => {
+            const active = currentLayout === layout.id;
+            return (
+              <motion.button
+                key={layout.id}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => handleSelectLayout(layout.id)}
+                disabled={saving}
+                className={`relative text-left p-5 rounded-xl border-2 transition-all ${
+                  active
+                    ? 'border-accent bg-accent/[0.04] shadow-sm'
+                    : 'border-border bg-section/50 hover:border-accent/40'
+                }`}
+              >
+                {active && (
+                  <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-accent flex items-center justify-center">
+                    <CheckCircle className="w-4 h-4 text-white" />
+                  </div>
+                )}
+                <div className={`w-12 h-12 mb-4 rounded-xl bg-gradient-to-br ${layout.color} flex items-center justify-center`}>
+                  <layout.icon className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="font-heading font-bold text-primary text-sm mb-1">{layout.label}</h3>
+                <p className="text-xs text-text-muted leading-relaxed">{layout.description}</p>
+                {active && (
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="text-xs font-semibold text-accent mt-3 flex items-center gap-1"
+                  >
+                    <Sparkles className="w-3 h-3" /> Currently active
+                  </motion.p>
+                )}
+              </motion.button>
+            );
+          })}
+        </div>
+      </motion.div>
 
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-3">

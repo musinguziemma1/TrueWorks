@@ -292,4 +292,10 @@ export default defineSchema({
   })
     .index("by_status", ["status"])
     .index("by_priority", ["priority"]),
+
+  settings: defineTable({
+    key: v.string(),
+    value: v.string(),
+  })
+    .index("by_key", ["key"]),
 });
