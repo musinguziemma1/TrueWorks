@@ -126,6 +126,8 @@ export const create = mutation({
     downloadExpiry: v.number(),
     status: v.union(v.literal("active"), v.literal("draft"), v.literal("archived")),
     featured: v.boolean(),
+    createdAt: v.string(),
+    updatedAt: v.string(),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("products", { ...args, salesCount: 0, relatedProducts: [] });
@@ -160,6 +162,8 @@ export const update = mutation({
     fileCompatibility: v.optional(v.string()),
     faq: v.optional(v.array(v.object({ question: v.string(), answer: v.string() }))),
     relatedProducts: v.optional(v.array(v.id("products"))),
+    createdAt: v.optional(v.string()),
+    updatedAt: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const { id, ...fields } = args;

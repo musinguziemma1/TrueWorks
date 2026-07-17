@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<products>
+  <product id="prod_001">
+    <name>Hospital KPI Dashboard Pro</name>
+    <sku>TW-HKD-001</sku>
+    <slug>hospital-kpi-dashboard-pro</slug>
+    <category>Dashboards</category>
+    <industry>Healthcare</industry>
+    <file_type>Excel (.xlsx)</file_type>
+    <price>150000</price>
+    <sale_price>99000</sale_price>
+    <file_compatibility>Microsoft Excel 2016 or later (Windows & Mac). Some features require macros to be enabled.</file_compatibility>
+    <download_link>https://example.com/templates/Hospital_KPI_Dashboard_Pro.xlsx</download_link>
+    <demo_link>https://example.com/demo/hospital-dashboard</demo_link>
+  </product>
+  <product id="prod_002">
+    <name>Financial Model & Valuation Toolkit</name>
+    <sku>TW-FM-002</sku>
+    <slug>financial-model-valuation-toolkit</slug>
+    <category>Financial Models</category>
+    <industry>Finance</industry>
+    <file_type>Excel (.xlsx)</file_type>
+    <price>250000</price>
+    <sale_price null="true"/>
+    <file_compatibility>Microsoft Excel 2016 or later (Windows only). Requires macros and Analysis ToolPak.</file_compatibility>
+    <download_link>https://example.com/templates/Financial_Model_Toolkit.xlsx</download_link>
+    <demo_link>https://example.com/demo/financial-model</demo_link>
+  </product>
+  <product id="prod_003">
+    <name>NGO Grant Management System</name>
+    <sku>TW-NGO-003</sku>
+    <slug>ngo-grant-management-system</slug>
+    <category>Financial Models</category>
+    <industry>NGO</industry>
+    <file_type>Excel (.xlsx)</file_type>
+    <price>180000</price>
+    <sale_price>129000</sale_price>
+    <file_compatibility>Microsoft Excel 2016 or later (Windows & Mac). No macros required for basic functions.</file_compatibility>
+    <download_link>https://example.com/templates/NGO_Grant_System.xlsx</download_link>
+    <demo_link>https://example.com/demo/ngo-grant</demo_link>
+  </product>
+  <product id="prod_004">
+    <name>School Administration Dashboard</name>
+    <sku>TW-SCH-004</sku>
+    <slug>school-administration-dashboard</slug>
+    <category>Dashboards</category>
+    <industry>Schools</industry>
+    <file_type>Excel (.xlsx)</file_type>
+    <price>120000</price>
+    <sale_price null="true"/>
+    <file_compatibility>Microsoft Excel 2016 or later (Windows & Mac). No macros required.</file_compatibility>
+    <download_link>https://example.com/templates/School_Admin_Dashboard.xlsx</download_link>
+    <demo_link>https://example.com/demo/school-dashboard</demo_link>
+  </product>
+  <product id="prod_005">
+    <name>Church Stewardship & Finance System</name>
+    <sku>TW-CH-005</sku>
+    <slug>church-stewardship-finance-system</slug>
+    <category>Budget Templates</category>
+    <industry>Churches</industry>
+    <file_type>Excel (.xlsx)</file_type>
+    <price>85000</price>
+    <sale_price null="true"/>
+    <file_compatibility>Microsoft Excel 2016 or later (Windows & Mac).</file_compatibility>
+    <download_link>https://example.com/templates/Church_Finance_System.xlsx</download_link>
+    <demo_link>https://example.com/demo/church-finance</demo_link>
+  </product>
+  <product id="prod_006">
+    <name>HR & Payroll Management System</name>
+    <sku>TW-HR-006</sku>
+    <slug>hr-payroll-management-system</slug>
+    <category>HR Systems</category>
+    <industry>HR</industry>
+    <file_type>Excel (.xlsx)</file_type>
+    <price>200000</price>
+    <sale_price>149000</sale_price>
+    <file_compatibility>Microsoft Excel 2016 or later (Windows only). Requires macros for payroll calculations.</file_compatibility>
+    <download_link>https://example.com/templates/HR_Payroll_System.xlsx</download_link>
+    <demo_link>https://example.com/demo/hr-payroll</demo_link>
+  </product>
+  <product id="prod_007">
+    <name>SME Business Budget & Forecast Pro</name>
+    <sku>TW-BF-007</sku>
+    <slug>sme-business-budget-forecast-pro</slug>
+    <category>Budget Templates</category>
+    <industry>Business</industry>
+    <file_type>Excel (.xlsx)</file_type>
+    <price>95000</price>
+    <sale_price null="true"/>
+    <file_compatibility>Microsoft Excel 2016 or later (Windows & Mac).</file_compatibility>
+    <download_link>https://example.com/templates/SME_Budget_Forecast.xlsx</download_link>
+    <demo_link>https://example.com/demo/sme-budget</demo_link>
+  </product>
+  <product id="prod_008">
+    <name>Agriculture Farm Management System</name>
+    <sku>TW-AG-008</sku>
+    <slug>agriculture-farm-management-system</slug>
+    <category>Inventory Systems</category>
+    <industry>Agriculture</industry>
+    <file_type>Excel (.xlsx)</file_type>
+    <price>110000</price>
+    <sale_price null="true"/>
+    <file_compatibility>Microsoft Excel 2016 or later (Windows & Mac).</file_compatibility>
+    <download_link>https://example.com/templates/Farm_Management_System.xlsx</download_link>
+    <demo_link>https://example.com/demo/farm-management</demo_link>
+  </product>
+  <product id="prod_009">
+    <name>Ultimate Business Bundle</name>
+    <sku>TW-BND-009</sku>
+    <slug>ultimate-business-bundle</slug>
+    <category>Bundles</category>
+    <industry>Business</industry>
+    <file_type>Multiple Formats</file_type>
+    <price>550000</price>
+    <sale_price>329000</sale_price>
+    <file_compatibility>Microsoft Excel 2016 or later. Individual file requirements apply (see product pages).</file_compatibility>
+    <download_link>https://example.com/templates/Ultimate_Business_Bundle.zip</download_link>
+    <demo_link>https://example.com/demo/business-bundle</demo_link>
+  </product>
+</products>
