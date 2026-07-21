@@ -1,0 +1,8 @@
+TrueWorks Template - Installation Notes
+
+1. Extract the template file to your preferred folder
+2. Enable macros in Excel: File > Options > Trust Center > Trust Center Settings > Macro Settings > Enable all macros
+3. Open the template and click 'Enable Editing'
+4. Follow the setup guide to configure for your organization
+
+For support: hello@trueworks.ug

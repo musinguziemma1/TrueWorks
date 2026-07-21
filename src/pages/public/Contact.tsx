@@ -6,6 +6,8 @@ import { Mail, Phone, MapPin, MessageCircle, Clock, Send, CheckCircle } from 'lu
 import { Section } from '../../components/ui/Section';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
+import { contactSchema, parseForm, type FormErrors, type ContactForm } from '../../lib/validation';
+import { SEO } from '../../components/SEO';
 
 const contactMethods: { icon: typeof Mail; title: string; description: string; sub: string; href?: string }[] = [
   { icon: Mail, title: 'Email Us', description: 'hello@trueworks.ug', sub: 'We respond within 24 hours', href: 'mailto:hello@trueworks.ug' },
@@ -20,18 +22,57 @@ const supportCards = [
   { title: 'Partnerships', description: 'Interested in partnering with TrueWorks?', icon: MessageCircle },
 ];
 
+const EMPTY: ContactForm = { name: '', email: '', subject: '', message: '' };
+
 export function Contact() {
-  const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
+  const [formData, setFormData] = useState<ContactForm>(EMPTY);
+  // Honeypot field — real users cannot see/fill it (CSS positions
+  // it offscreen), but naive bots auto-fill every input. The
+  // server rejects submissions where this is non-empty.
+  const [honeypot, setHoneypot] = useState('');
+  const [errors, setErrors] = useState<FormErrors<ContactForm>>({});
+  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const sendContact = useMutation(api.content.sendContactMessage);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await sendContact(formData);
-    setSubmitted(true);
+
+    // Honeypot tripped — silently bail as if everything worked.
+    // We don't reveal to the bot that its submission was rejected;
+    // the server also short-circuits when honeypot is non-empty.
+    if (honeypot) {
+      setSubmitted(true);
+      return;
+    }
+
+    // Validate via Zod before touching the network. The Convex
+    // mutation also re-validates (defense in depth — see
+    // convex/content.ts).
+    const result = parseForm(contactSchema, formData);
+    if (!result.ok) {
+      setErrors(result.errors);
+      return;
+    }
+    setErrors({});
+    setSubmitting(true);
+    try {
+      await sendContact({ ...result.data, honeypot });
+      setSubmitted(true);
+    } catch (err) {
+      setErrors({ message: 'Could not send message. Please try again.' });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
+    <>
+      <SEO
+        title="Contact Us"
+        description="Get in touch with the TrueWorks team. We're here to help with template questions, custom solutions, technical support and sales inquiries."
+        canonical="/contact"
+      />
     <div className="pt-24 md:pt-28">
       <Section variant="dark" className="text-center">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -90,30 +131,64 @@ export function Contact() {
               </motion.div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="grid sm:grid-cols-2 gap-5">
-                  <Input
-                    label="Full Name"
-                    placeholder="Your name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    required
-                  />
-                  <Input
-                    label="Email Address"
-                    type="email"
-                    placeholder="you@organization.com"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    required
+                {/* Honeypot — visually hidden from real users but
+                    spammed by bots. Must stay far off-screen so
+                    screen-readers AND bots see it. */}
+                <div
+                  aria-hidden="true"
+                  style={{
+                    position: 'absolute',
+                    left: '-10000px',
+                    top: 'auto',
+                    width: '1px',
+                    height: '1px',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <label htmlFor="tw-contact-company">Company</label>
+                  <input
+                    id="tw-contact-company"
+                    name="company"
+                    type="text"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
                   />
                 </div>
-                <Input
-                  label="Subject"
-                  placeholder="How can we help?"
-                  value={formData.subject}
-                  onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                  required
-                />
+                <div className="grid sm:grid-cols-2 gap-5">
+                  <div>
+                    <Input
+                      label="Full Name"
+                      placeholder="Your name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      required
+                    />
+                    {errors.name && <p className="text-xs text-error mt-1">{errors.name}</p>}
+                  </div>
+                  <div>
+                    <Input
+                      label="Email Address"
+                      type="email"
+                      placeholder="you@organization.com"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      required
+                    />
+                    {errors.email && <p className="text-xs text-error mt-1">{errors.email}</p>}
+                  </div>
+                </div>
+                <div>
+                  <Input
+                    label="Subject"
+                    placeholder="How can we help?"
+                    value={formData.subject}
+                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                    required
+                  />
+                  {errors.subject && <p className="text-xs text-error mt-1">{errors.subject}</p>}
+                </div>
                 <div>
                   <label className="block text-sm font-semibold text-text-primary mb-1.5">Message</label>
                   <textarea
@@ -124,10 +199,11 @@ export function Contact() {
                     required
                     className="w-full px-4 py-2.5 rounded-md border border-border bg-white text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-colors"
                   />
+                  {errors.message && <p className="text-xs text-error mt-1">{errors.message}</p>}
                 </div>
-                <Button type="submit" variant="primary" size="lg">
+                <Button type="submit" variant="primary" size="lg" disabled={submitting}>
                   <Send className="w-4 h-4" />
-                  Send Message
+                  {submitting ? 'Sending…' : 'Send Message'}
                 </Button>
               </form>
             )}
@@ -165,5 +241,6 @@ export function Contact() {
         </div>
       </Section>
     </div>
+    </>
   );
 }

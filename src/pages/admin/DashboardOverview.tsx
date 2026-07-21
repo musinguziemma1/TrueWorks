@@ -16,6 +16,9 @@ export function DashboardOverview() {
   if (dashboardData === undefined || salesTrends === undefined || monthlyRevenue === undefined || paymentMethods === undefined) {
     return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
   }
+  if (!dashboardData || !salesTrends || !monthlyRevenue || !paymentMethods) {
+    return null;
+  }
 
   const kpiCards = [
     { label: 'Total Revenue', value: formatPrice(dashboardData.totalRevenue), icon: DollarSign, trend: { value: '12.5%', positive: true } },
@@ -211,7 +214,7 @@ export function DashboardOverview() {
               { text: 'Product review submitted', time: '12 hours ago', type: 'review' },
             ].map((activity, idx) => (
               <div key={idx} className="flex items-center gap-3 text-sm">
-                <div className="w-2 h-2 rounded-full bg-accent flex-shrink-0" />
+                <div className="w-2 h-2 rounded-full bg-accent shrink-0" />
                 <div className="flex-1">
                   <p className="text-primary">{activity.text}</p>
                   <p className="text-xs text-text-muted">{activity.time}</p>

@@ -118,8 +118,8 @@ export function ProductEditor({ product, isOpen, onClose, onSave }: ProductEdito
               <div className="border-t border-border pt-6">
                 <h3 className="font-heading font-bold text-primary text-sm uppercase tracking-wider mb-4">Pricing</h3>
                 <div className="grid sm:grid-cols-3 gap-4">
-                  <Input label="Price (UGX)" type="number" value={form.price} onChange={(e) => setForm({...form, price: Number(e.target.value)})} />
-                  <Input label="Sale Price (UGX)" type="number" value={form.salePrice || ''} onChange={(e) => setForm({...form, salePrice: e.target.value ? Number(e.target.value) : undefined})} />
+                  <Input label="Price (USD)" type="number" value={form.price} onChange={(e) => setForm({...form, price: Number(e.target.value)})} />
+                  <Input label="Sale Price (USD)" type="number" value={form.salePrice || ''} onChange={(e) => setForm({...form, salePrice: e.target.value ? Number(e.target.value) : undefined})} />
                   <Input label="Version" value={form.version} onChange={(e) => setForm({...form, version: e.target.value})} />
                 </div>
               </div>

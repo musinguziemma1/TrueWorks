@@ -97,7 +97,6 @@ export function LayoutOriginal() {
   const [slide, setSlide] = useState(0);
   const featuredProducts = useQuery(api.products.getFeatured, { limit: 4 });
   const testimonials = useQuery(api.reviews.list, { approved: true, featured: true, limit: 3 });
-  const reviewStats = useQuery(api.reviews.getStats);
 
   const nextSlide = useCallback(() => setSlide(p => (p + 1) % heroSlides.length), []);
 
@@ -113,17 +112,17 @@ export function LayoutOriginal() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(74,111,165,0.12),transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_left,rgba(201,162,39,0.06),transparent_50%)]" />
         <motion.div
-          className="absolute top-20 left-10 w-72 h-72 border border-white/[0.04] rounded-full"
+          className="absolute top-20 left-10 w-72 h-72 border border-white/4 rounded-full"
           animate={{ rotate: 360 }}
           transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
         />
         <motion.div
-          className="absolute bottom-20 right-10 w-96 h-96 border border-white/[0.04] rounded-full"
+          className="absolute bottom-20 right-10 w-96 h-96 border border-white/4 rounded-full"
           animate={{ rotate: -360 }}
           transition={{ duration: 50, repeat: Infinity, ease: 'linear' }}
         />
         <motion.div
-          className="absolute top-1/3 right-1/4 w-48 h-48 border border-accent/[0.03] rounded-full"
+          className="absolute top-1/3 right-1/4 w-48 h-48 border border-accent/3 rounded-full"
           animate={{ rotate: 360, scale: [1, 1.05, 1] }}
           transition={{ rotate: { duration: 30, repeat: Infinity, ease: 'linear' }, scale: { duration: 4, repeat: Infinity, ease: 'easeInOut' } }}
         />
@@ -139,7 +138,7 @@ export function LayoutOriginal() {
             >
               <div>
                 <motion.div
-                  className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.07] border border-white/[0.08] mb-6"
+                  className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/7 border border-white/8 mb-6"
                   animate={{ borderColor: ['rgba(255,255,255,0.08)', 'rgba(201,162,39,0.3)', 'rgba(255,255,255,0.08)'] }}
                   transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
                 >
@@ -175,11 +174,11 @@ export function LayoutOriginal() {
               <div className="relative hidden lg:block">
                 {heroSlides[slide].visual === 'table' && (
                   <motion.div
-                    className="rounded-xl bg-white/[0.04] border border-white/[0.08] overflow-hidden backdrop-blur-sm"
+                    className="rounded-xl bg-white/4 border border-white/8 overflow-hidden backdrop-blur-sm"
                     animate={{ y: [0, -6, 0] }}
                     transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
                   >
-                    <div className="px-5 py-3 border-b border-white/[0.08] flex items-center gap-2">
+                    <div className="px-5 py-3 border-b border-white/8 flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full bg-red-400" />
                       <div className="w-2 h-2 rounded-full bg-yellow-400" />
                       <div className="w-2 h-2 rounded-full bg-green-400" />
@@ -188,7 +187,7 @@ export function LayoutOriginal() {
                     <div className="p-0">
                       <table className="w-full text-sm">
                         <thead>
-                          <tr className="border-b border-white/[0.08]">
+                          <tr className="border-b border-white/8">
                             <th className="text-left px-5 py-3 text-white/50 font-medium text-xs uppercase tracking-wider">Service Line</th>
                             <th className="text-right px-5 py-3 text-white/50 font-medium text-xs uppercase tracking-wider">Revenue</th>
                             <th className="text-right px-5 py-3 text-white/50 font-medium text-xs uppercase tracking-wider">Margin</th>
@@ -208,7 +207,7 @@ export function LayoutOriginal() {
                               initial={{ opacity: 0, x: -10 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: 0.5 + i * 0.08, duration: 0.4 }}
-                              className="border-b border-white/[0.05] hover:bg-white/[0.05] transition-colors"
+                              className="border-b border-white/5 hover:bg-white/5 transition-colors"
                             >
                               <td className="px-5 py-3 text-white/80 font-medium">{row.name}</td>
                               <td className="px-5 py-3 text-white/60 text-right font-mono">UGX {row.revenue}</td>
@@ -225,7 +224,7 @@ export function LayoutOriginal() {
                           ))}
                         </tbody>
                         <tfoot>
-                          <tr className="border-t border-white/[0.1]">
+                          <tr className="border-t border-white/10">
                             <td className="px-5 py-3 text-white font-semibold">Total</td>
                             <td className="px-5 py-3 text-accent text-right font-mono font-semibold">UGX 17,150,000</td>
                             <td className="px-5 py-3 text-white/60 text-right font-mono">65%</td>
@@ -238,7 +237,7 @@ export function LayoutOriginal() {
                 )}
                 {heroSlides[slide].visual === 'healthcare' && (
                   <motion.div
-                    className="rounded-xl bg-white/[0.04] border border-white/[0.08] overflow-hidden backdrop-blur-sm p-6"
+                    className="rounded-xl bg-white/4 border border-white/8 overflow-hidden backdrop-blur-sm p-6"
                     animate={{ y: [0, -6, 0] }}
                     transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
                   >
@@ -272,7 +271,7 @@ export function LayoutOriginal() {
                 )}
                 {heroSlides[slide].visual === 'ngo' && (
                   <motion.div
-                    className="rounded-xl bg-white/[0.04] border border-white/[0.08] overflow-hidden backdrop-blur-sm p-6"
+                    className="rounded-xl bg-white/4 border border-white/8 overflow-hidden backdrop-blur-sm p-6"
                     animate={{ y: [0, -6, 0] }}
                     transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
                   >
@@ -292,7 +291,7 @@ export function LayoutOriginal() {
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
                           transition={{ delay: 0.3 + i * 0.08 }}
-                          className="p-3 rounded-lg bg-white/[0.06]"
+                          className="p-3 rounded-lg bg-white/6"
                         >
                           <p className="text-white/50 text-xs">{stat.label}</p>
                           <p className="text-white font-bold font-heading text-lg">{stat.value}</p>
@@ -307,7 +306,7 @@ export function LayoutOriginal() {
                 )}
                 {heroSlides[slide].visual === 'business' && (
                   <motion.div
-                    className="rounded-xl bg-white/[0.04] border border-white/[0.08] overflow-hidden backdrop-blur-sm p-6"
+                    className="rounded-xl bg-white/4 border border-white/8 overflow-hidden backdrop-blur-sm p-6"
                     animate={{ y: [0, -6, 0] }}
                     transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
                   >
@@ -356,7 +355,7 @@ export function LayoutOriginal() {
       </section>
 
       {/* Feature Badges Banner */}
-      <section className="bg-[#0A1529] border-b border-white/[0.06] overflow-hidden relative">
+      <section className="bg-[#0A1529] border-b border-white/6 overflow-hidden relative">
         <motion.div
           className="absolute inset-0 w-full h-full"
           animate={{ backgroundPosition: ['0% 0%', '100% 0%'] }}
@@ -364,7 +363,7 @@ export function LayoutOriginal() {
           style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(201,162,39,0.04) 50%, transparent 100%)', backgroundSize: '200% 100%' }}
         />
         <div className="max-w-7xl mx-auto px-4 md:px-6 relative">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-0 divide-x divide-white/[0.08]">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-0 divide-x divide-white/8">
             {[
               'Formula-audited',
               'Driver-based',
@@ -383,7 +382,7 @@ export function LayoutOriginal() {
                   animate={{ scale: [1, 1.15, 1] }}
                   transition={{ duration: 2, delay: i * 0.4, repeat: Infinity, ease: 'easeInOut' }}
                 >
-                  <CheckCircle className="w-4 h-4 text-accent flex-shrink-0" />
+                  <CheckCircle className="w-4 h-4 text-accent shrink-0" />
                 </motion.div>
                 <span className="text-sm text-white/70 font-medium">{badge}</span>
               </motion.div>
@@ -417,7 +416,7 @@ export function LayoutOriginal() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((i) => (
               <div key={i} className="animate-pulse rounded-lg border border-border bg-white overflow-hidden">
-                <div className="aspect-[4/3] bg-section" />
+                <div className="aspect-4/3 bg-section" />
                 <div className="p-5 space-y-3">
                   <div className="h-4 bg-section rounded w-1/3" />
                   <div className="h-5 bg-section rounded w-3/4" />
@@ -485,16 +484,16 @@ export function LayoutOriginal() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: idx * 0.1 }}
-                className="flex-shrink-0 w-[350px] md:w-[450px] rounded-xl border border-border bg-white overflow-hidden hover:shadow-card-hover transition-shadow"
+                className="shrink-0 w-87.5 md:w-112.5 rounded-xl border border-border bg-white overflow-hidden hover:shadow-card-hover transition-shadow"
               >
-                <div className={`h-48 bg-gradient-to-br ${showcase.color} p-6 flex flex-col justify-end`}>
+                <div className={`h-48 bg-linear-to-br ${showcase.color} p-6 flex flex-col justify-end`}>
                   <h3 className="font-heading text-xl font-bold text-white">{showcase.name}</h3>
                 </div>
                 <div className="p-5">
                   <div className="grid grid-cols-2 gap-3">
                     {showcase.metrics.map((metric) => (
                       <div key={metric} className="flex items-center gap-2 text-sm text-text-secondary">
-                        <CheckCircle className="w-4 h-4 text-accent flex-shrink-0" />
+                        <CheckCircle className="w-4 h-4 text-accent shrink-0" />
                         {metric}
                       </div>
                     ))}
@@ -540,7 +539,7 @@ export function LayoutOriginal() {
               transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
             >
               {[...testimonials, ...testimonials].map((t, i) => (
-                <div key={`${t._id}-${i}`} className="flex-shrink-0 w-[350px]">
+                <div key={`${t._id}-${i}`} className="shrink-0 w-87.5">
                   <TestimonialCard
                     name={t.customerName}
                     role="Customer"
@@ -604,8 +603,8 @@ export function LayoutOriginal() {
             <p className="text-white/40 text-sm mt-3">No credit card required. Instant download.</p>
           </div>
           <div className="hidden md:block relative">
-            <div className="aspect-[4/3] rounded-2xl bg-white/5 border border-white/10 overflow-hidden">
-              <div className="absolute inset-4 rounded-xl bg-gradient-to-br from-accent/20 to-accent/5 border border-accent/20 flex items-center justify-center">
+            <div className="aspect-4/3 rounded-2xl bg-white/5 border border-white/10 overflow-hidden">
+              <div className="absolute inset-4 rounded-xl bg-linear-to-br from-accent/20 to-accent/5 border border-accent/20 flex items-center justify-center">
                 <FileText className="w-16 h-16 text-accent/40" />
               </div>
             </div>

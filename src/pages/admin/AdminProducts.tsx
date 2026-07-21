@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, Search, Grid3X3, List, Edit, Copy, Trash2, Download } from 'lucide-react';
-import { useQuery, useMutation } from 'convex/react';
+import { useMutation } from 'convex/react';
+import { useAdminQuery } from '../../hooks/useAdminQuery';
 import { api } from '../../../convex/_generated/api';
 import { formatPrice, cn } from '../../lib/utils';
 import { Badge } from '../../components/ui/Badge';
@@ -16,7 +17,7 @@ export function AdminProducts() {
   const [searchQuery, setSearchQuery] = useState('');
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const products = useQuery(api.products.list, {});
+  const products = useAdminQuery(api.products.list, {});
   const createProduct = useMutation(api.products.create);
   const updateProduct = useMutation(api.products.update);
   const deleteProduct = useMutation(api.products.remove);
@@ -37,7 +38,7 @@ export function AdminProducts() {
       label: 'Product',
       render: (p) => (
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-md bg-section flex items-center justify-center flex-shrink-0">
+          <div className="w-10 h-10 rounded-md bg-section flex items-center justify-center shrink-0">
             <Download className="w-5 h-5 text-text-muted" />
           </div>
           <div>
@@ -200,7 +201,7 @@ export function AdminProducts() {
               animate={{ opacity: 1, y: 0 }}
               className="p-4 rounded-lg border border-border bg-white hover:shadow-card-hover transition-all group"
             >
-              <div className="aspect-[4/3] rounded-md bg-section mb-3 flex items-center justify-center relative overflow-hidden">
+              <div className="aspect-4/3 rounded-md bg-section mb-3 flex items-center justify-center relative overflow-hidden">
                 <Download className="w-8 h-8 text-text-muted" />
                 <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-colors" />
               </div>

@@ -1,12 +1,12 @@
 import { motion } from 'framer-motion';
 import { MessageCircle, Mail, Search, Filter, CheckCircle, Clock, AlertCircle, ArrowRight } from 'lucide-react';
-import { useQuery } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
+import { useAdminQuery } from '../../hooks/useAdminQuery';
 import { api } from '../../../convex/_generated/api';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { cn } from '../../lib/utils';
 import { useState, useMemo } from 'react';
-import { useMutation } from 'convex/react';
 
 interface Ticket {
   id: string; subject: string; customer: string; email: string;
@@ -88,7 +88,7 @@ export function AdminSupport() {
             >
               <div className="flex items-start justify-between mb-2">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center text-white text-sm font-bold">
+                  <div className="w-9 h-9 rounded-full bg-linear-to-br from-secondary to-primary flex items-center justify-center text-white text-sm font-bold">
                     {ticket.customer.split(' ').map((n) => n[0]).join('')}
                   </div>
                   <div>

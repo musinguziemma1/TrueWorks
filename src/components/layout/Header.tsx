@@ -36,7 +36,7 @@ export function Header() {
     >
       {/* Gold accent line */}
       <div className={cn(
-        'h-[2px] bg-gradient-to-r from-transparent via-accent to-transparent transition-opacity duration-300',
+        'h-[2px] bg-linear-to-r from-transparent via-accent to-transparent transition-opacity duration-300',
         scrolled ? 'opacity-0' : 'opacity-100'
       )} />
       <div className="max-w-7xl mx-auto px-4 md:px-6">

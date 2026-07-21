@@ -5,18 +5,27 @@ import { Section } from '../../components/ui/Section';
 import { Button } from '../../components/ui/Button';
 import { useCartStore } from '../../lib/store';
 import { formatPrice } from '../../lib/utils';
+import { SEO } from '../../components/SEO';
+import { getCartSummary } from '../../lib/cartUtils';
 
 export function Cart() {
   const { items, removeItem, updateQuantity, clearCart, subtotal } = useCartStore();
+  const cartSummary = getCartSummary(items);
 
   if (items.length === 0) {
     return (
+      <>
+        <SEO
+          title="Your Cart"
+          description="Review the items in your shopping cart and proceed to secure checkout."
+          canonical="/cart"
+        />
       <div className="pt-28 min-h-screen">
         <Section className="text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <ShoppingBag className="w-16 h-16 text-text-muted mx-auto mb-4" />
             <h1 className="font-heading text-3xl font-bold text-primary mb-2">Your Cart is Empty</h1>
-            <p className="text-text-secondary mb-6">Browse our premium templates and add some to your cart.</p>
+            <p className="text-text-secondary mb-6">Browse our premium templates and add one to your cart to continue to checkout.</p>
             <Link to="/store">
               <Button variant="primary" size="lg">
                 Browse Templates
@@ -26,16 +35,23 @@ export function Cart() {
           </motion.div>
         </Section>
       </div>
+      </>
     );
   }
 
   return (
+    <>
+      <SEO
+        title={`Shopping Cart (${items.length} ${items.length === 1 ? 'item' : 'items'})`}
+        description="Review the items in your shopping cart and proceed to secure checkout."
+        canonical="/cart"
+      />
     <div className="pt-24 md:pt-28 min-h-screen">
       <Section>
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="font-heading text-3xl md:text-4xl font-bold text-primary">Shopping Cart</h1>
-            <p className="text-text-secondary mt-1">{items.length} {items.length === 1 ? 'item' : 'items'}</p>
+            <p className="text-text-secondary mt-1">{cartSummary.totalItems} {cartSummary.itemLabel}</p>
           </div>
           <Button variant="ghost" size="sm" onClick={clearCart}>
             <Trash2 className="w-4 h-4" /> Clear Cart
@@ -53,7 +69,7 @@ export function Cart() {
                 exit={{ opacity: 0, x: 20 }}
                 className="flex gap-4 p-4 rounded-lg border border-border bg-white hover:shadow-card transition-all"
               >
-                <div className="w-24 h-24 rounded-lg bg-section flex-shrink-0 flex items-center justify-center">
+                <div className="w-24 h-24 rounded-lg bg-section shrink-0 flex items-center justify-center">
                   <ShoppingBag className="w-8 h-8 text-text-muted" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -115,14 +131,18 @@ export function Cart() {
                   <ArrowRight className="w-5 h-5" />
                 </Button>
               </Link>
-              <div className="flex items-center justify-center gap-2 mt-4 text-xs text-text-muted">
-                <ShieldCheck className="w-4 h-4 text-accent" />
-                Secure checkout with Mobile Money & Card
+              <div className="rounded-lg border border-border bg-section p-3 mt-4 text-sm text-text-secondary">
+                <div className="flex items-center justify-center gap-2 text-xs text-text-muted">
+                  <ShieldCheck className="w-4 h-4 text-accent" />
+                  Secure checkout with Mobile Money & Card
+                </div>
+                <p className="text-center mt-2">Your files are delivered instantly after payment confirmation.</p>
               </div>
             </div>
           </div>
         </div>
       </Section>
     </div>
+    </>
   );
 }

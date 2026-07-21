@@ -1,7 +1,26 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { authTables } from "@convex-dev/auth/server";
+
+// ============================================================
+// DATABASE SCHEMA
+// ============================================================
+// Spreads Convex Auth tables (users, sessions, accounts, etc.)
+// alongside TrueWorks domain tables. Auth users get an `_id`
+// we link to via `userId` on the existing `users` (admin staff)
+// table — kept separate so customer vs. staff models stay
+// distinct.
+// ============================================================
 
 export default defineSchema({
+    // --------------------------------------------------------------
+    // Convex Auth tables — auto-managed
+    // --------------------------------------------------------------
+    ...authTables,
+
+    // --------------------------------------------------------------
+    // TrueWorks domain tables
+    // --------------------------------------------------------------
     products: defineTable({
       name: v.string(),
       sku: v.string(),
@@ -17,6 +36,10 @@ export default defineSchema({
       images: v.array(v.string()),
       thumbnail: v.string(),
       downloadableFiles: v.array(v.string()),
+      // ID of the file uploaded to Convex file storage. Download URLs
+      // are issued via `fileStorage.getUrl`, only after the downloads
+      // table validates the requestor isn't over their limit.
+      fileStorageId: v.optional(v.id("_storage")),
       version: v.string(),
       changelog: v.string(),
       demoUrl: v.optional(v.string()),
@@ -34,8 +57,8 @@ export default defineSchema({
       status: v.union(v.literal("active"), v.literal("draft"), v.literal("archived")),
       featured: v.boolean(),
       salesCount: v.number(),
-      createdAt: v.string(),
-      updatedAt: v.string(),
+      createdAt: v.optional(v.string()),
+      updatedAt: v.optional(v.string()),
     })
     .index("by_slug", ["slug"])
     .index("by_category", ["category"])
@@ -221,7 +244,8 @@ export default defineSchema({
     reference: v.string(),
   })
     .index("by_order", ["orderId"])
-    .index("by_status", ["status"]),
+    .index("by_status", ["status"])
+    .index("by_reference", ["reference"]),
 
   notifications: defineTable({
     title: v.string(),
@@ -266,6 +290,7 @@ export default defineSchema({
   })
     .index("by_product", ["productId"])
     .index("by_customer", ["customerId"])
+    .index("by_order", ["orderId"])
     .index("by_status", ["status"]),
 
   activityLogs: defineTable({

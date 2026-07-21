@@ -295,7 +295,7 @@ export const products: Product[] = [
     version: '2.0',
     changelog: 'Updated all included templates',
     faq: [
-      { question: 'What is included in the bundle?', answer: '4 premium templates valued at UGX 550,000+.' },
+      { question: 'What is included in the bundle?', answer: '4 premium templates valued at $150+.' },
     ],
     relatedProducts: ['prod2', 'prod6', 'prod7'],
     seoTitle: 'Ultimate Business Bundle - TrueWorks',

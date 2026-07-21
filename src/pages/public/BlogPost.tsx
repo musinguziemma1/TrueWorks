@@ -6,6 +6,8 @@ import { api } from '../../../convex/_generated/api';
 import { Section } from '../../components/ui/Section';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
+import { sanitizeHtml } from '../../lib/validation';
+import { SEO } from '../../components/SEO';
 
 export function BlogPost() {
   const { slug } = useParams();
@@ -25,6 +27,27 @@ export function BlogPost() {
   }
 
   return (
+    <>
+      <SEO
+        title={post.title}
+        description={post.excerpt}
+        canonical={`/blog/${slug}`}
+        ogImage={post.image}
+        ogType="article"
+        jsonLd={{
+          '@type': 'Article',
+          headline: post.title,
+          description: post.excerpt,
+          image: post.image,
+          author: { '@type': 'Person', name: post.author },
+          datePublished: post.publishedAt,
+          publisher: {
+            '@type': 'Organization',
+            name: 'TrueWorks',
+            logo: { '@type': 'ImageObject', url: 'https://trueworks.com/logo.png' },
+          },
+        }}
+      />
     <div className="pt-24 md:pt-28">
       <Section variant="dark" className="text-center py-16">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -47,7 +70,7 @@ export function BlogPost() {
 
       <Section>
         <article className="max-w-3xl mx-auto">
-          <div className="prose prose-gray max-w-none" dangerouslySetInnerHTML={{ __html: post.content }} />
+          <div className="prose prose-gray max-w-none" dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }} />
           {post.tags.length > 0 && (
             <div className="flex items-center gap-2 mt-8 pt-6 border-t border-border">
               <Tag className="w-4 h-4 text-text-muted" />
@@ -65,5 +88,6 @@ export function BlogPost() {
         </Link>
       </Section>
     </div>
+    </>
   );
 }

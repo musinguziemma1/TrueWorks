@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import { Section, SectionHeader } from '../../components/ui/Section';
 import { cn } from '../../lib/utils';
+import { SEO } from '../../components/SEO';
 
 const faqs = [
   {
@@ -16,9 +17,9 @@ const faqs = [
   {
     category: 'Payment',
     items: [
-      { q: 'What payment methods do you accept?', a: 'We accept MTN Mobile Money, Airtel Money, Visa, and Mastercard. All payments are processed securely through our payment gateway.' },
-      { q: 'Is it safe to pay with mobile money on your site?', a: 'Yes. Payments are processed through Flutterwave, a PCI-compliant payment gateway. We do not store your payment details.' },
-      { q: 'Do you show prices in USD?', a: 'All prices are shown in Ugandan Shillings (UGX). We may add a USD toggle in future updates.' },
+      { q: 'What payment methods do you accept?', a: 'We accept major credit cards (Visa, Mastercard) and mobile money (MTN, Airtel) where supported. All payments are processed securely through our PCI-compliant payment gateway, Pesapal.' },
+      { q: 'Is it safe to pay on your site?', a: 'Yes. Payments are processed through Pesapal, a PCI-compliant payment gateway. We do not store your payment details on our servers.' },
+      { q: 'What currency are prices shown in?', a: 'All prices are shown in United States Dollars (USD). Mobile money options may settle in your local currency equivalent at the prevailing rate.' },
     ],
   },
   {
@@ -50,6 +51,12 @@ export function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
+    <>
+      <SEO
+        title="Frequently Asked Questions"
+        description="Answers to common questions about ordering, payment, delivery and using TrueWorks Excel templates and business systems."
+        canonical="/faq"
+      />
     <div className="pt-24 md:pt-28">
       <Section variant="dark" className="text-center">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -75,7 +82,7 @@ export function FAQ() {
                         aria-expanded={isOpen}
                       >
                         <span className="font-semibold text-primary pr-4">{item.q}</span>
-                        <ChevronDown className={cn('w-5 h-5 text-text-muted flex-shrink-0 transition-transform', isOpen && 'rotate-180')} />
+                        <ChevronDown className={cn('w-5 h-5 text-text-muted shrink-0 transition-transform', isOpen && 'rotate-180')} />
                       </button>
                       {isOpen && (
                         <div className="px-5 pb-4 text-sm text-text-secondary leading-relaxed border-t border-border pt-3">
@@ -91,5 +98,6 @@ export function FAQ() {
         </div>
       </Section>
     </div>
+    </>
   );
 }

@@ -1,6 +1,8 @@
 import { Suspense, lazy } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { ConvexProvider } from 'convex/react';
+import { ConvexAuthProvider, useConvexAuth, useAuthActions } from '@convex-dev/auth/react';
+import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from 'react-hot-toast';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
@@ -9,6 +11,9 @@ import { NewsletterModal } from './components/ui/NewsletterModal';
 import { convexClient } from './lib/convexClient';
 import { useAnalytics } from './hooks/useAnalytics';
 import { ErrorBoundary } from './components/ErrorBoundary';
+
+// Lazy-loaded admin auth
+const AdminLogin = lazy(() => import('./pages/admin/AdminLogin').then(m => ({ default: m.AdminLogin })));
 
 // Lazy-loaded public pages
 const Home = lazy(() => import('./pages/public/Home').then(m => ({ default: m.Home })));
@@ -69,6 +74,34 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
+// ============================================================
+// PROTECTED ROUTE GUARD
+// ============================================================
+// Wraps admin routes. While Convex Auth resolves the session,
+// we render a full-page spinner. Once resolved, if not
+// authenticated we redirect to /admin/login (preserving the
+// destination so login can bounce back).
+// ============================================================
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isLoading, isAuthenticated } = useConvexAuth();
+  const location = useLocation();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-section">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-text-muted">Verifying session…</p>
+        </div>
+      </div>
+    );
+  }
+  if (!isAuthenticated) {
+    return <Navigate to="/admin/login" state={{ from: location.pathname }} replace />;
+  }
+  return <>{children}</>;
+}
+
 function AnalyticsTracker() {
   useAnalytics();
   return null;
@@ -76,64 +109,74 @@ function AnalyticsTracker() {
 
 function AppContent() {
   return (
-    <BrowserRouter>
-      <AnalyticsTracker />
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          duration: 4000,
-          style: {
-            borderRadius: '6px',
-            border: '1px solid #E5E7EB',
-            boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.08)',
-            fontFamily: '"Calibri", system-ui, sans-serif',
-          },
-        }}
-      />
-      <Suspense fallback={<PageLoader />}>
-        <Routes>
-          <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
-          <Route path="/store" element={<PublicLayout><Store /></PublicLayout>} />
-          <Route path="/product/:slug" element={<PublicLayout><ProductDetail /></PublicLayout>} />
-          <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
-          <Route path="/resources" element={<PublicLayout><Resources /></PublicLayout>} />
-          <Route path="/resources/:slug" element={<PublicLayout><BlogPost /></PublicLayout>} />
-          <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
-          <Route path="/cart" element={<PublicLayout><Cart /></PublicLayout>} />
-          <Route path="/checkout" element={<PublicLayout><Checkout /></PublicLayout>} />
-          <Route path="/order-confirmation" element={<PublicLayout><OrderConfirmation /></PublicLayout>} />
-          <Route path="/terms" element={<PublicLayout><Terms /></PublicLayout>} />
-          <Route path="/privacy" element={<PublicLayout><Privacy /></PublicLayout>} />
-          <Route path="/refund-policy" element={<PublicLayout><RefundPolicy /></PublicLayout>} />
-          <Route path="/faq" element={<PublicLayout><FAQPage /></PublicLayout>} />
-          <Route path="/download" element={<PublicLayout><DownloadPage /></PublicLayout>} />
+    <HelmetProvider>
+      <BrowserRouter>
+        <AnalyticsTracker />
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              borderRadius: '6px',
+              border: '1px solid #E5E7EB',
+              boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.08)',
+              fontFamily: '"Calibri", system-ui, sans-serif',
+            },
+          }}
+        />
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
+            <Route path="/store" element={<PublicLayout><Store /></PublicLayout>} />
+            <Route path="/product/:slug" element={<PublicLayout><ProductDetail /></PublicLayout>} />
+            <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
+            <Route path="/resources" element={<PublicLayout><Resources /></PublicLayout>} />
+            <Route path="/resources/:slug" element={<PublicLayout><BlogPost /></PublicLayout>} />
+            <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
+            <Route path="/cart" element={<PublicLayout><Cart /></PublicLayout>} />
+            <Route path="/checkout" element={<PublicLayout><Checkout /></PublicLayout>} />
+            <Route path="/order-confirmation" element={<PublicLayout><OrderConfirmation /></PublicLayout>} />
+            <Route path="/terms" element={<PublicLayout><Terms /></PublicLayout>} />
+            <Route path="/privacy" element={<PublicLayout><Privacy /></PublicLayout>} />
+            <Route path="/refund-policy" element={<PublicLayout><RefundPolicy /></PublicLayout>} />
+            <Route path="/faq" element={<PublicLayout><FAQPage /></PublicLayout>} />
+            <Route path="/download" element={<PublicLayout><DownloadPage /></PublicLayout>} />
 
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<DashboardOverview />} />
-            <Route path="products" element={<AdminProducts />} />
-            <Route path="orders" element={<AdminOrders />} />
-            <Route path="customers" element={<AdminCustomers />} />
-            <Route path="downloads" element={<AdminDownloads />} />
-            <Route path="categories" element={<AdminCategories />} />
-            <Route path="coupons" element={<ErrorBoundary><AdminCoupons /></ErrorBoundary>} />
-            <Route path="content" element={<AdminContent />} />
-            <Route path="media" element={<AdminMedia />} />
-            <Route path="email" element={<AdminEmail />} />
-            <Route path="reviews" element={<AdminReviews />} />
-            <Route path="analytics" element={<AdminAnalytics />} />
-            <Route path="reports" element={<AdminReports />} />
-            <Route path="payments" element={<AdminPayments />} />
-            <Route path="users" element={<AdminUsers />} />
-            <Route path="settings" element={<AdminSettings />} />
-            <Route path="resources" element={<AdminResources />} />
-            <Route path="support" element={<AdminSupport />} />
-          </Route>
+            {/* Admin login — NOT guarded */}
+            <Route path="/admin/login" element={<AdminLogin />} />
 
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Suspense>
-      <NewsletterModal />
-    </BrowserRouter>
+            {/* Admin panel — protected */}
+            <Route path="/admin" element={
+              <ProtectedRoute>
+                <AdminLayout />
+              </ProtectedRoute>
+            }>
+              <Route index element={<ErrorBoundary><DashboardOverview /></ErrorBoundary>} />
+              <Route path="products" element={<ErrorBoundary><AdminProducts /></ErrorBoundary>} />
+              <Route path="orders" element={<ErrorBoundary><AdminOrders /></ErrorBoundary>} />
+              <Route path="customers" element={<ErrorBoundary><AdminCustomers /></ErrorBoundary>} />
+              <Route path="downloads" element={<ErrorBoundary><AdminDownloads /></ErrorBoundary>} />
+              <Route path="categories" element={<ErrorBoundary><AdminCategories /></ErrorBoundary>} />
+              <Route path="coupons" element={<ErrorBoundary><AdminCoupons /></ErrorBoundary>} />
+              <Route path="content" element={<ErrorBoundary><AdminContent /></ErrorBoundary>} />
+              <Route path="media" element={<ErrorBoundary><AdminMedia /></ErrorBoundary>} />
+              <Route path="email" element={<ErrorBoundary><AdminEmail /></ErrorBoundary>} />
+              <Route path="reviews" element={<ErrorBoundary><AdminReviews /></ErrorBoundary>} />
+              <Route path="analytics" element={<ErrorBoundary><AdminAnalytics /></ErrorBoundary>} />
+              <Route path="reports" element={<ErrorBoundary><AdminReports /></ErrorBoundary>} />
+              <Route path="payments" element={<ErrorBoundary><AdminPayments /></ErrorBoundary>} />
+              <Route path="users" element={<ErrorBoundary><AdminUsers /></ErrorBoundary>} />
+              <Route path="settings" element={<ErrorBoundary><AdminSettings /></ErrorBoundary>} />
+              <Route path="resources" element={<ErrorBoundary><AdminResources /></ErrorBoundary>} />
+              <Route path="support" element={<ErrorBoundary><AdminSupport /></ErrorBoundary>} />
+            </Route>
+
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+        <NewsletterModal />
+      </BrowserRouter>
+    </HelmetProvider>
   );
 }
 
@@ -143,7 +186,9 @@ function App() {
   }
   return (
     <ConvexProvider client={convexClient}>
-      <AppContent />
+      <ConvexAuthProvider client={convexClient}>
+        <AppContent />
+      </ConvexAuthProvider>
     </ConvexProvider>
   );
 }

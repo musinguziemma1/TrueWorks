@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Building2, HeartPulse, TrendingUp, GraduationCap, Church, HandHeart, Star, Quote } from 'lucide-react';
+import { ArrowRight, Building2, HeartPulse, TrendingUp, GraduationCap, Church, HandHeart, Star } from 'lucide-react';
 import { useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { Button } from '../ui/Button';
@@ -12,7 +12,7 @@ import { useCartStore } from '../../lib/store';
 import type { Product } from '../../lib/types';
 
 const stagger = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.07, delayChildren: 0.1 } } };
-const fadeUp = { hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: 'easeOut' } } };
+const fadeUp = { hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: 'easeOut' as const } } };
 
 const categories = [
   { name: 'Healthcare', icon: HeartPulse, count: 8, color: 'from-blue-500 to-blue-600' },
@@ -37,7 +37,7 @@ export function LayoutShowroom() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative min-h-[60vh] flex items-center overflow-hidden bg-gradient-to-br from-[#060D1A] via-[#0B1A35] to-[#0B2545]">
+      <section className="relative min-h-[60vh] flex items-center overflow-hidden bg-linear-to-br from-[#060D1A] via-[#0B1A35] to-primary">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_right,rgba(74,111,165,0.12),transparent_60%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_left,rgba(201,162,39,0.06),transparent_60%)]" />
         <div className="relative max-w-7xl mx-auto px-4 md:px-6 py-20 md:py-28 w-full">
@@ -83,7 +83,7 @@ export function LayoutShowroom() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 + i * 0.1 }}
-                  className={`flex-1 rounded-xl bg-gradient-to-b ${p.color} p-5 flex flex-col justify-end min-h-[280px] relative overflow-hidden`}
+                  className={`flex-1 rounded-xl bg-linear-to-b ${p.color} p-5 flex flex-col justify-end min-h-70 relative overflow-hidden`}
                 >
                   <motion.div
                     className="absolute inset-0 opacity-15"
@@ -122,7 +122,7 @@ export function LayoutShowroom() {
           </motion.div>
           {featuredProducts === undefined ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[1, 2, 3, 4].map(i => <div key={i} className="animate-pulse rounded-lg border border-border bg-white overflow-hidden"><div className="aspect-[4/3] bg-section" /><div className="p-5 space-y-3"><div className="h-4 bg-section rounded w-1/3" /><div className="h-5 bg-section rounded w-3/4" /><div className="h-3 bg-section rounded w-full" /><div className="h-6 bg-section rounded w-1/4" /></div></div>)}
+              {[1, 2, 3, 4].map(i => <div key={i} className="animate-pulse rounded-lg border border-border bg-white overflow-hidden"><div className="aspect-4/3 bg-section" /><div className="p-5 space-y-3"><div className="h-4 bg-section rounded w-1/3" /><div className="h-5 bg-section rounded w-3/4" /><div className="h-3 bg-section rounded w-full" /><div className="h-6 bg-section rounded w-1/4" /></div></div>)}
             </div>
           ) : (
             <motion.div variants={stagger} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -153,7 +153,7 @@ export function LayoutShowroom() {
                 whileHover={{ y: -4, scale: 1.03 }}
                 className="flex flex-col items-center gap-3 p-5 rounded-xl bg-white border border-border hover:shadow-card transition-all cursor-pointer"
               >
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${cat.color} flex items-center justify-center`}>
+                <div className={`w-12 h-12 rounded-xl bg-linear-to-br ${cat.color} flex items-center justify-center`}>
                   <cat.icon className="w-5 h-5 text-white" />
                 </div>
                 <span className="text-sm font-semibold text-primary text-center">{cat.name}</span>
@@ -169,20 +169,20 @@ export function LayoutShowroom() {
         <Section>
           <SectionHeader title="See Your Data Come Alive" subtitle="Interactive dashboards and financial models that give you real-time visibility." />
           <motion.div variants={stagger} initial="hidden" whileInView="visible" viewport={{ once: true }} className="flex gap-4 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4">
-            {previewProducts.map((p, idx) => (
+            {previewProducts.map(p => (
               <motion.div
                 key={p.name}
                 variants={fadeUp}
                 whileHover={{ y: -8 }}
-                className="flex-shrink-0 w-[350px] md:w-[450px] rounded-xl border border-border bg-white overflow-hidden hover:shadow-card-hover transition-shadow"
+                className="shrink-0 w-87.5 md:w-112.5 rounded-xl border border-border bg-white overflow-hidden hover:shadow-card-hover transition-shadow"
               >
-                <div className={`h-48 bg-gradient-to-br ${p.color} p-6 flex flex-col justify-end relative overflow-hidden`}>
+                <div className={`h-48 bg-linear-to-br ${p.color} p-6 flex flex-col justify-end relative overflow-hidden`}>
                   <motion.div className="absolute inset-0 opacity-20" style={{ background: 'radial-gradient(circle at 50% 50%, rgba(255,255,255,0.3) 0%, transparent 70%)' }} animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }} />
                   <h3 className="font-heading text-xl font-bold text-white relative z-10">{p.name}</h3>
                 </div>
                 <div className="p-5">
                   <div className="grid grid-cols-2 gap-3">
-                    {p.metrics.map(m => <div key={m} className="flex items-center gap-2 text-sm text-text-secondary"><Star className="w-4 h-4 text-accent flex-shrink-0" />{m}</div>)}
+                    {p.metrics.map(m => <div key={m} className="flex items-center gap-2 text-sm text-text-secondary"><Star className="w-4 h-4 text-accent shrink-0" />{m}</div>)}
                   </div>
                 </div>
               </motion.div>
@@ -203,7 +203,7 @@ export function LayoutShowroom() {
             <div className="relative overflow-hidden">
               <motion.div className="flex gap-6" animate={{ x: ['0%', '-50%'] }} transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}>
                 {[...testimonials, ...testimonials].map((t, i) => (
-                  <div key={`${t._id}-${i}`} className="flex-shrink-0 w-[350px]">
+                  <div key={`${t._id}-${i}`} className="shrink-0 w-87.5">
                     <TestimonialCard name={t.customerName} role="Customer" company="TrueWorks" quote={t.content} rating={t.rating} />
                   </div>
                 ))}

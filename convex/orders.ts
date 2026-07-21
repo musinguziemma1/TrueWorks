@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 import { Doc, Id } from "./_generated/dataModel";
+import { requireStaffUser, getStaffUserOrNull } from "./auth.helpers";
 
 export const list = query({
   args: {
@@ -11,6 +12,8 @@ export const list = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    const staff = await getStaffUserOrNull(ctx);
+    if (!staff) return null;
     let orders = await ctx.db.query("orders").collect();
 
     if (args.status) orders = orders.filter(o => o.orderStatus === args.status);
@@ -33,6 +36,8 @@ export const list = query({
 export const getById = query({
   args: { id: v.id("orders") },
   handler: async (ctx, args) => {
+    const staff = await getStaffUserOrNull(ctx);
+    if (!staff) return null;
     return await ctx.db.get(args.id);
   },
 });
@@ -40,10 +45,48 @@ export const getById = query({
 export const getByOrderNumber = query({
   args: { orderNumber: v.string() },
   handler: async (ctx, args) => {
+    const staff = await getStaffUserOrNull(ctx);
+    if (!staff) return null;
     return await ctx.db
       .query("orders")
       .withIndex("by_orderNumber", (q) => q.eq("orderNumber", args.orderNumber))
       .first();
+  },
+});
+
+/**
+ * Public lookup helper for buyer-facing pages (OrderConfirmation,
+ * receipt link in emails). It requires BOTH the order id AND the
+ * customer email to authenticate the caller — the order id alone
+ * is treated as unguessable but pairing with email prevents
+ * replay/inspection when URLs are forwarded.
+ *
+ * Returns only a sanitized subset of fields safe for the public.
+ */
+export const getOrderForBuyer = query({
+  args: {
+    orderId: v.id("orders"),
+    email: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const order = await ctx.db.get(args.orderId);
+    if (!order) return null;
+
+    const normalized = args.email.trim().toLowerCase();
+    const stored = (order.customer?.email || "").trim().toLowerCase();
+    if (normalized !== stored) return null;
+
+    return {
+      _id: order._id,
+      _creationTime: order._creationTime,
+      orderNumber: order.orderNumber,
+      total: order.total,
+      paymentMethod: order.paymentMethod,
+      paymentStatus: order.paymentStatus,
+      orderStatus: order.orderStatus,
+      items: order.items,
+      downloadLinks: order.downloadLinks,
+    };
   },
 });
 
@@ -94,6 +137,7 @@ export const updateStatus = mutation({
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     const { id, ...fields } = args;
     await ctx.db.patch(id, fields);
     return await ctx.db.get(id);
@@ -110,6 +154,7 @@ export const addDownloadLink = mutation({
     expiryDays: v.number(),
   },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     const order = await ctx.db.get(args.orderId);
     if (!order) throw new Error("Order not found");
 
@@ -135,6 +180,7 @@ export const addDownloadLink = mutation({
 export const resendDownloadLink = mutation({
   args: { orderId: v.id("orders") },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     const order = await ctx.db.get(args.orderId);
     if (!order) throw new Error("Order not found");
     // In production, this would trigger an email send
@@ -150,6 +196,7 @@ export const resetDownloads = mutation({
     newLimit: v.number(),
   },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     const order = await ctx.db.get(args.orderId);
     if (!order) throw new Error("Order not found");
 

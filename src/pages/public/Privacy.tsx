@@ -1,8 +1,15 @@
 import { motion } from 'framer-motion';
 import { Section } from '../../components/ui/Section';
+import { SEO } from '../../components/SEO';
 
 export function Privacy() {
   return (
+    <>
+      <SEO
+        title="Privacy Policy"
+        description="TrueWorks Limited privacy policy — how we collect, use and protect your personal information when you use our website and purchase our digital products."
+        canonical="/privacy"
+      />
     <div className="pt-24 md:pt-28">
       <Section variant="dark" className="text-center">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -36,7 +43,7 @@ export function Privacy() {
           <h2>4. Data Sharing</h2>
           <p>We do not sell your personal information. We may share data with:</p>
           <ul>
-            <li>Our payment gateway (Flutterwave/Pesapal) to process transactions</li>
+            <li>Our payment gateway (Pesapal) to process transactions</li>
             <li>MailerLite to manage email subscriptions and purchase follow-ups</li>
             <li>Google Analytics and Meta for website analytics and advertising</li>
           </ul>
@@ -66,5 +73,6 @@ export function Privacy() {
         </div>
       </Section>
     </div>
+    </>
   );
 }

@@ -19,7 +19,7 @@ export function FeatureCard({ icon: Icon, title, description, variant = 'default
         transition={{ duration: 0.4 }}
         className="flex items-start gap-4 p-4"
       >
-        <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
+        <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
           <Icon className="w-5 h-5 text-accent" />
         </div>
         <div>
@@ -43,7 +43,7 @@ export function FeatureCard({ icon: Icon, title, description, variant = 'default
           'bg-white'
         )}
       >
-        <div className="w-14 h-14 rounded-xl bg-primary/5 flex items-center justify-center flex-shrink-0">
+        <div className="w-14 h-14 rounded-xl bg-primary/5 flex items-center justify-center shrink-0">
           <Icon className="w-7 h-7 text-primary" />
         </div>
         <div>

@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
 import { Doc, Id } from "./_generated/dataModel";
+import { requireStaffUser, isStaffUser } from "./auth.helpers";
 
 export const list = query({
   args: {
@@ -13,11 +14,18 @@ export const list = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    const isStaff = await isStaffUser(ctx);
     let products = await ctx.db.query("products").collect();
 
-    if (args.status) {
-      products = products.filter(p => p.status === args.status);
+    // Public callers (no staff session) can ONLY see products
+    // with status === "active". Drafts and archived items are
+    // staff-only.
+    if (!isStaff) {
+      products = products.filter((p) => p.status === "active");
+    } else if (args.status) {
+      products = products.filter((p) => p.status === args.status);
     }
+
     if (args.featured !== undefined) {
       products = products.filter(p => p.featured === args.featured);
     }
@@ -126,10 +134,11 @@ export const create = mutation({
     downloadExpiry: v.number(),
     status: v.union(v.literal("active"), v.literal("draft"), v.literal("archived")),
     featured: v.boolean(),
-    createdAt: v.string(),
-    updatedAt: v.string(),
+    createdAt: v.optional(v.string()),
+    updatedAt: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     return await ctx.db.insert("products", { ...args, salesCount: 0, relatedProducts: [] });
   },
 });
@@ -166,6 +175,7 @@ export const update = mutation({
     updatedAt: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     const { id, ...fields } = args;
     await ctx.db.patch(id, fields);
     return await ctx.db.get(id);
@@ -175,6 +185,7 @@ export const update = mutation({
 export const remove = mutation({
   args: { id: v.id("products") },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     await ctx.db.delete(args.id);
   },
 });
@@ -182,6 +193,7 @@ export const remove = mutation({
 export const duplicate = mutation({
   args: { id: v.id("products") },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     const original = await ctx.db.get(args.id);
     if (!original) throw new Error("Product not found");
     const { _id, _creationTime, ...data } = original;

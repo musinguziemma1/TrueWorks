@@ -87,7 +87,7 @@ export function SearchOverlay() {
               aria-label="Search products"
             >
               <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
-                <Search className="w-5 h-5 text-text-muted flex-shrink-0" />
+                <Search className="w-5 h-5 text-text-muted shrink-0" />
                 <input
                   ref={inputRef}
                   type="text"
@@ -120,17 +120,17 @@ export function SearchOverlay() {
                       className="w-full flex items-center gap-3 px-4 py-3 hover:bg-section/50 transition-colors text-left border-b border-border last:border-0"
                       aria-label={`View ${product.name}`}
                     >
-                      <div className="w-10 h-10 rounded-lg bg-section flex items-center justify-center flex-shrink-0">
+                      <div className="w-10 h-10 rounded-lg bg-section flex items-center justify-center shrink-0">
                         <Icon className="w-5 h-5 text-text-muted" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-primary truncate">{product.name}</p>
                         <p className="text-xs text-text-muted truncate">{product.category} · {product.industry}</p>
                       </div>
-                      <div className="text-right flex-shrink-0">
+                      <div className="text-right shrink-0">
                         <p className="text-sm font-bold text-primary">{formatPrice(product.salePrice || product.price)}</p>
                       </div>
-                      <ArrowRight className="w-4 h-4 text-text-muted flex-shrink-0" />
+                      <ArrowRight className="w-4 h-4 text-text-muted shrink-0" />
                     </button>
                   );
                 })}

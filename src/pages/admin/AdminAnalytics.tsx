@@ -33,6 +33,9 @@ export function AdminAnalytics() {
   if (monthlyRevenue === undefined || paymentMethods === undefined) {
     return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
   }
+  if (!monthlyRevenue || !paymentMethods) {
+    return null;
+  }
 
   return (
     <div>
@@ -110,7 +113,7 @@ export function AdminAnalytics() {
                   <span className="font-semibold">{stage.count.toLocaleString()}</span>
                 </div>
                 <div className="h-2 rounded-full bg-section overflow-hidden">
-                  <div className="h-full rounded-full bg-gradient-to-r from-accent to-secondary" style={{ width: `${(stage.count / funnelData[0].count) * 100}%` }} />
+                  <div className="h-full rounded-full bg-linear-to-r from-accent to-secondary" style={{ width: `${(stage.count / funnelData[0].count) * 100}%` }} />
                 </div>
               </div>
             ))}

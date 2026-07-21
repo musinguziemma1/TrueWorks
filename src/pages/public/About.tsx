@@ -4,6 +4,7 @@ import { Section, SectionHeader } from '../../components/ui/Section';
 import { StatCard } from '../../components/ui/StatCard';
 import { FeatureCard } from '../../components/ui/FeatureCard';
 import { Badge } from '../../components/ui/Badge';
+import { SEO } from '../../components/SEO';
 
 const timeline = [
   { year: '2020', title: 'Founded in Kampala', description: 'TrueWorks Limited was established to bridge the gap between professional business systems and African organizations.' },
@@ -25,6 +26,17 @@ const values = [
 
 export function About() {
   return (
+    <>
+      <SEO
+        title="About Us"
+        description="Learn about TrueWorks Limited — our mission to build premium, institution-grade Excel templates and business systems for organizations across East Africa and beyond."
+        canonical="/about"
+        jsonLd={{
+          '@type': 'AboutPage',
+          name: 'About TrueWorks',
+          description: 'Our story, values and mission.',
+        }}
+      />
     <div className="pt-24 md:pt-28">
       {/* Hero */}
       <Section variant="dark" className="text-center">
@@ -69,7 +81,7 @@ export function About() {
               Today, we serve hospitals, NGOs, schools, churches, and businesses across East Africa, providing them with the tools they need to build better organizations.
             </p>
           </div>
-          <div className="aspect-[4/3] rounded-xl bg-gradient-to-br from-primary to-primary-light border border-white/10 flex items-center justify-center">
+          <div className="aspect-4/3 rounded-xl bg-linear-to-br from-primary to-primary-light border border-white/10 flex items-center justify-center">
             <div className="text-center p-8">
               <div className="w-24 h-24 mx-auto mb-6 rounded-2xl bg-accent/20 flex items-center justify-center">
                 <span className="text-accent font-heading font-bold text-3xl">TW</span>
@@ -108,7 +120,7 @@ export function About() {
       {/* Founder */}
       <Section>
         <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div className="aspect-square rounded-xl bg-gradient-to-br from-primary to-primary-light flex items-center justify-center">
+          <div className="aspect-square rounded-xl bg-linear-to-br from-primary to-primary-light flex items-center justify-center">
             <div className="text-center p-8">
               <div className="w-32 h-32 mx-auto mb-4 rounded-full border-2 border-accent bg-primary-light flex items-center justify-center">
                 <span className="text-accent font-heading font-bold text-4xl">TW</span>
@@ -177,6 +189,7 @@ export function About() {
         </div>
       </Section>
     </div>
+    </>
   );
 }
 

@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
+import { requireStaffUser, getStaffUserOrNull } from "./auth.helpers";
 
 export const list = query({
   args: {
@@ -8,6 +9,8 @@ export const list = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    const staff = await getStaffUserOrNull(ctx);
+    if (!staff) return null;
     let customers = await ctx.db.query("customers").collect();
 
     if (args.newsletter !== undefined) {
@@ -29,6 +32,8 @@ export const list = query({
 export const getById = query({
   args: { id: v.id("customers") },
   handler: async (ctx, args) => {
+    const staff = await getStaffUserOrNull(ctx);
+    if (!staff) return null;
     return await ctx.db.get(args.id);
   },
 });
@@ -36,6 +41,8 @@ export const getById = query({
 export const getByEmail = query({
   args: { email: v.string() },
   handler: async (ctx, args) => {
+    const staff = await getStaffUserOrNull(ctx);
+    if (!staff) return null;
     return await ctx.db
       .query("customers")
       .withIndex("by_email", (q) => q.eq("email", args.email))
@@ -89,6 +96,7 @@ export const update = mutation({
     favoriteCategories: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     const { id, ...fields } = args;
     await ctx.db.patch(id, fields);
     return await ctx.db.get(id);
@@ -97,6 +105,8 @@ export const update = mutation({
 
 export const getStats = query({
   handler: async (ctx) => {
+    const staff = await getStaffUserOrNull(ctx);
+    if (!staff) return null;
     const customers = await ctx.db.query("customers").collect();
     return {
       total: customers.length,

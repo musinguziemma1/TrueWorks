@@ -46,7 +46,7 @@ export function usePesapalPayment({
       // In production, replace with actual Pesapal API call
       const pesapalConfig = {
         id: orderNumber,
-        currency: 'UGX',
+        currency: 'USD',
         amount,
         description: `TrueWorks Order - ${orderNumber}`,
         callback_url: `${window.location.origin}/order-confirmation?orderId=${orderId}`,
@@ -54,7 +54,7 @@ export function usePesapalPayment({
         billing_address: {
           email_address: customerEmail,
           phone_number: customerPhone || '',
-          country_code: 'UG',
+          country_code: 'US',
           first_name: customerName.split(' ')[0] || customerName,
           last_name: customerName.split(' ').slice(1).join(' ') || '',
           line_1: '',

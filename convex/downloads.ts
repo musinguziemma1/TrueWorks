@@ -1,153 +1,178 @@
+// convex/downloads.ts
+// ============================================================
+// DOWNLOADS — PUBLIC API (better path)
+// ============================================================
+// Public-facing Convex queries/mutations the client app uses.
+// Internal helpers (signing, secure issuance) live in
+// `downloadSecure.ts`.
+// ============================================================
+
 import { v } from "convex/values";
-import { query, mutation } from "./_generated/server";
+import { query, mutation, internalQuery, internalMutation } from "./_generated/server";
 
-export const list = query({
-  args: {
-    status: v.optional(v.union(v.literal("active"), v.literal("expired"), v.literal("disabled"))),
-    productId: v.optional(v.id("products")),
-    customerId: v.optional(v.id("customers")),
-    limit: v.optional(v.number()),
-  },
-  handler: async (ctx, args) => {
-    let downloads = await ctx.db.query("downloads").collect();
-
-    if (args.status) downloads = downloads.filter(d => d.status === args.status);
-    if (args.productId) downloads = downloads.filter(d => d.productId === args.productId);
-    if (args.customerId) downloads = downloads.filter(d => d.customerId === args.customerId);
-
-    downloads.sort((a, b) => b._creationTime - a._creationTime);
-    if (args.limit) downloads = downloads.slice(0, args.limit);
-    return downloads;
-  },
+// ------------------------------------------------------------
+// VALIDATE — used by the Download page to decide what to show.
+// ------------------------------------------------------------
+export const validate = query({
+    args: {
+        downloadId: v.id("downloads"),
+    },
+    handler: async (ctx, args) => {
+        const dl = await ctx.db.get(args.downloadId);
+        if (!dl) {
+            return { valid: false, reason: "not_found" as const };
+        }
+        if (dl.status !== "active") {
+            return { valid: false, reason: "inactive" as const };
+        }
+        const expiry = new Date(dl.expiryDate).getTime();
+        if (expiry < Date.now()) {
+            return { valid: false, reason: "expired" as const };
+        }
+        if (dl.remainingDownloads <= 0) {
+            return { valid: false, reason: "limit_reached" as const };
+        }
+        const product = await ctx.db.get(dl.productId);
+        return {
+            valid: true as const,
+            download: {
+                productName: (product as { name?: string } | null)?.name ?? "Your template",
+                remainingDownloads: dl.remainingDownloads,
+                expiryDate: dl.expiryDate,
+                files: [(product as { name?: string } | null)?.name ?? "template"],
+            },
+        };
+    },
 });
 
-export const getById = query({
-  args: { id: v.id("downloads") },
-  handler: async (ctx, args) => {
-    return await ctx.db.get(args.id);
-  },
-});
-
-export const validate = mutation({
-  args: { downloadId: v.id("downloads") },
-  handler: async (ctx, args) => {
-    const download = await ctx.db.get(args.downloadId);
-    if (!download) {
-      return { valid: false, reason: "Download not found" };
-    }
-
-    if (download.status === "disabled") {
-      return { valid: false, reason: "This download link has been disabled" };
-    }
-
-    if (download.status === "expired") {
-      return { valid: false, reason: "This download link has expired" };
-    }
-
-    // Check expiry date
-    const expiryDate = new Date(download.expiryDate);
-    if (expiryDate < new Date()) {
-      // Auto-expire the download
-      await ctx.db.patch(args.downloadId, { status: "expired" });
-      return { valid: false, reason: "This download link has expired" };
-    }
-
-    // Check remaining downloads
-    if (download.remainingDownloads <= 0) {
-      await ctx.db.patch(args.downloadId, { status: "disabled" });
-      return { valid: false, reason: "Download limit reached" };
-    }
-
-    // Get product info
-    const product = await ctx.db.get(download.productId);
-    if (!product) {
-      return { valid: false, reason: "Product not found" };
-    }
-
-    return {
-      valid: true,
-      download: {
-        ...download,
-        productName: product.name,
-        files: product.downloadableFiles,
-      },
-    };
-  },
-});
-
+// ------------------------------------------------------------
+// RECORD — invoked after a successful file-storage URL issue.
+// ------------------------------------------------------------
 export const recordDownload = mutation({
-  args: { downloadId: v.id("downloads") },
-  handler: async (ctx, args) => {
-    const download = await ctx.db.get(args.downloadId);
-    if (!download) {
-      throw new Error("Download not found");
-    }
-
-    if (download.status !== "active") {
-      throw new Error("This download link is no longer active");
-    }
-
-    if (download.remainingDownloads <= 0) {
-      await ctx.db.patch(args.downloadId, { status: "disabled" });
-      throw new Error("Download limit reached");
-    }
-
-    // Check expiry
-    const expiryDate = new Date(download.expiryDate);
-    if (expiryDate < new Date()) {
-      await ctx.db.patch(args.downloadId, { status: "expired" });
-      throw new Error("This download link has expired");
-    }
-
-    // Increment download count and decrement remaining
-    await ctx.db.patch(args.downloadId, {
-      downloadCount: download.downloadCount + 1,
-      remainingDownloads: download.remainingDownloads - 1,
-    });
-
-    return {
-      success: true,
-      remainingDownloads: download.remainingDownloads - 1,
-    };
-  },
+    args: {
+        downloadId: v.id("downloads"),
+        device: v.optional(v.string()),
+        ipAddress: v.optional(v.string()),
+    },
+    handler: async (ctx, args) => {
+        const row = await ctx.db.get(args.downloadId);
+        if (!row) {
+            throw new Error("Download not found");
+        }
+        const next = Math.max(0, row.remainingDownloads - 1);
+        await ctx.db.patch(row._id, {
+            downloadCount: row.downloadCount + 1,
+            remainingDownloads: next,
+            ...(args.device ? { device: args.device } : {}),
+            ...(args.ipAddress ? { ipAddress: args.ipAddress } : {}),
+            status: next === 0 ? ("expired" as const) : row.status,
+        });
+        return { remaining: next };
+    },
 });
 
-export const create = mutation({
-  args: {
-    productId: v.id("products"),
-    customerId: v.id("customers"),
-    orderId: v.id("orders"),
-    downloadLimit: v.number(),
-    expiryDays: v.number(),
-  },
-  handler: async (ctx, args) => {
-    const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + args.expiryDays);
-
-    return await ctx.db.insert("downloads", {
-      productId: args.productId,
-      customerId: args.customerId,
-      orderId: args.orderId,
-      downloadCount: 0,
-      remainingDownloads: args.downloadLimit,
-      expiryDate: expiryDate.toISOString(),
-      status: "active",
-    });
-  },
+// ------------------------------------------------------------
+// LIST — used by the "My Downloads" UI.
+// ------------------------------------------------------------
+export const list = query({
+    args: {},
+    handler: async (ctx) => {
+        return await ctx.db.query("downloads").collect();
+    },
 });
 
 export const getStats = query({
-  handler: async (ctx) => {
-    const downloads = await ctx.db.query("downloads").collect();
-    return {
-      total: downloads.length,
-      active: downloads.filter(d => d.status === "active").length,
-      expired: downloads.filter(d => d.status === "expired").length,
-      disabled: downloads.filter(d => d.status === "disabled").length,
-      totalDownloads: downloads.reduce((sum, d) => sum + d.downloadCount, 0),
-      activeDownloads: downloads
-        .filter(d => d.status === "active")
-        .reduce((sum, d) => sum + d.remainingDownloads, 0),
-    };
-  },
+    args: {},
+    handler: async (ctx) => {
+        const downloads = await ctx.db.query("downloads").collect();
+        const active = downloads.filter((d) => d.status === "active").length;
+        const expired = downloads.filter((d) => d.status === "expired").length;
+        const totalDownloads = downloads.reduce((sum, d) => sum + d.downloadCount, 0);
+        const activeDownloads = downloads.filter((d) => d.status === "active" && d.remainingDownloads > 0).length;
+
+        return {
+            totalDownloads,
+            active,
+            expired,
+            activeDownloads,
+        };
+    },
+});
+
+export const listForOrder = query({
+    args: { orderId: v.id("orders") },
+    handler: async (ctx, args) => {
+        return await ctx.db
+            .query("downloads")
+            .withIndex("by_order", (q) => q.eq("orderId", args.orderId))
+            .collect();
+    },
+});
+
+// ============================================================
+// INTERNAL HELPERS — used by downloadSecure.ts (Node action)
+// ============================================================
+
+/** Returns true if the customer still has download quota. */
+export const checkQuotaInternal = internalQuery({
+    args: {
+        orderId: v.string(),
+        productId: v.string(),
+    },
+    handler: async (ctx, args) => {
+        const downloads = await ctx.db
+            .query("downloads")
+            .withIndex("by_order", (q) => q.eq("orderId", args.orderId as any))
+            .collect();
+        const dl = downloads.find((d) => d.productId === args.productId);
+        if (!dl) return false;
+        if (dl.status !== "active") return false;
+
+        const expiry = new Date(dl.expiryDate).getTime();
+        if (expiry < Date.now()) {
+            // Can't `patch` from a query — caller (action) handles the update.
+            return false;
+        }
+        if (dl.remainingDownloads <= 0) {
+            return false;
+        }
+        return true;
+    },
+});
+
+/** Returns the file-storage id + filename for the download route. */
+export const getFileForDownload = internalQuery({
+    args: { productId: v.string() },
+    handler: async (ctx, args) => {
+        const product = await ctx.db.get(args.productId as any);
+        if (!product) return null;
+        return {
+            slug: (product as any).slug ?? String((product as any)._id),
+            fileStorageId: (product as any).fileStorageId ?? null,
+        };
+    },
+});
+
+/** Record one download attempt + decrement remaining quota. */
+export const recordDownloadInternal = internalMutation({
+    args: {
+        orderId: v.string(),
+        productId: v.string(),
+        ipAddress: v.optional(v.string()),
+        device: v.optional(v.string()),
+    },
+    handler: async (ctx, args) => {
+        const downloads = await ctx.db
+            .query("downloads")
+            .withIndex("by_order", (q) => q.eq("orderId", args.orderId as any))
+            .collect();
+        const dl = downloads.find((d) => d.productId === args.productId);
+        if (!dl) return;
+        await ctx.db.patch(dl._id, {
+            downloadCount: dl.downloadCount + 1,
+            remainingDownloads: Math.max(0, dl.remainingDownloads - 1),
+            ...(args.ipAddress ? { ipAddress: args.ipAddress } : {}),
+            ...(args.device ? { device: args.device } : {}),
+        });
+    },
 });

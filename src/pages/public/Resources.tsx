@@ -9,6 +9,7 @@ import { useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { resources } from '../../lib/data';
 import { cn } from '../../lib/utils';
+import { SEO } from '../../components/SEO';
 
 const categories = ['All', 'Excel Tips', 'Hospital Management', 'Business Systems'];
 
@@ -28,6 +29,12 @@ export function Resources() {
   }
 
   return (
+    <>
+      <SEO
+        title="Resources & Insights"
+        description="Expert guides, case studies, articles and tutorials to help organizations in East Africa build better systems, sharper operations and stronger outcomes."
+        canonical="/resources"
+      />
     <div className="pt-24 md:pt-28">
       <Section variant="dark" className="text-center">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -74,7 +81,7 @@ export function Resources() {
                 transition={{ delay: idx * 0.05 }}
                 className="group rounded-lg border border-border bg-white overflow-hidden hover:shadow-card-hover transition-all"
               >
-                <div className="aspect-[16/9] bg-gradient-to-br from-section to-section-alt flex items-center justify-center">
+                <div className="aspect-[16/9] bg-linear-to-br from-section to-section-alt flex items-center justify-center">
                   <BookOpen className="w-12 h-12 text-text-muted/40" />
                 </div>
                 <div className="p-5">
@@ -127,5 +134,6 @@ export function Resources() {
         </div>
       </Section>
     </div>
+    </>
   );
 }

@@ -33,7 +33,7 @@ export function TestimonialCard({ name, role, company, quote, rating }: Testimon
         &ldquo;{quote}&rdquo;
       </blockquote>
       <div className="flex items-center gap-4">
-        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center text-white font-heading font-bold text-lg">
+        <div className="w-12 h-12 rounded-full bg-linear-to-br from-secondary to-primary flex items-center justify-center text-white font-heading font-bold text-lg">
           {name.split(' ').map(n => n[0]).join('')}
         </div>
         <div>

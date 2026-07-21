@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Filter, Eye, Download, ChevronDown } from 'lucide-react';
 import { useQuery, useMutation } from 'convex/react';
+import { useAdminQuery } from '../../hooks/useAdminQuery';
 import { api } from '../../../convex/_generated/api';
 import { formatPrice, cn } from '../../lib/utils';
 import { Badge } from '../../components/ui/Badge';
@@ -26,14 +27,14 @@ const paymentStatusColors = {
 
 export function AdminOrders() {
   const [searchQuery, setSearchQuery] = useState('');
-  const orders = useQuery(api.orders.list, {});
+  const orders = useAdminQuery(api.orders.list, {});
   const updateOrderStatus = useMutation(api.orders.updateStatus);
 
   if (orders === undefined) {
     return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
   }
 
-  const filtered = orders.filter(o =>
+  const filtered = (orders ?? []).filter(o =>
     o.orderNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
     o.customer.name.toLowerCase().includes(searchQuery.toLowerCase())
   );

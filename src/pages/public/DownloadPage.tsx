@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { Button } from '../../components/ui/Button';
 import { CheckCircle, XCircle, Download, Loader2 } from 'lucide-react';
+import { SEO } from '../../components/SEO';
 
 export function DownloadPage() {
   const [searchParams] = useSearchParams();
@@ -11,18 +12,13 @@ export function DownloadPage() {
   const [downloading, setDownloading] = useState(false);
   const [downloadComplete, setDownloadComplete] = useState(false);
 
-  const [downloadInfo, setDownloadInfo] = useState<any>(null);
-  const [validating, setValidating] = useState(true);
-  const validateDownload = useMutation(api.downloads.validate);
+  const downloadInfo = useQuery(
+    api.downloads.validate,
+    downloadId ? { downloadId: downloadId as any } : 'skip'
+  );
   const recordDownload = useMutation(api.downloads.recordDownload);
 
-  useEffect(() => {
-    if (!downloadId) return;
-    setValidating(true);
-    validateDownload({ downloadId: downloadId as any })
-      .then(setDownloadInfo)
-      .finally(() => setValidating(false));
-  }, [downloadId, validateDownload]);
+  const validating = Boolean(downloadId) && downloadInfo === undefined;
 
   const handleDownload = async () => {
     if (!downloadId || !downloadInfo?.valid) return;
@@ -30,8 +26,6 @@ export function DownloadPage() {
     setDownloading(true);
     try {
       await recordDownload({ downloadId: downloadId as any });
-      // In production, this would trigger an actual file download
-      // For now, we just show success
       setDownloadComplete(true);
     } catch (error) {
       console.error('Download error:', error);
@@ -66,13 +60,13 @@ export function DownloadPage() {
     );
   }
 
-  if (!downloadInfo.valid) {
+  if (!downloadInfo?.valid) {
     return (
       <div className="pt-24 md:pt-28 min-h-screen flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-8">
           <XCircle className="w-16 h-16 text-error mx-auto mb-4" />
           <h1 className="font-heading text-2xl font-bold text-primary mb-2">Download Unavailable</h1>
-          <p className="text-text-secondary mb-6">{downloadInfo.reason}</p>
+          <p className="text-text-secondary mb-6">{downloadInfo?.reason ?? 'This download link is invalid or has expired.'}</p>
           <Link to="/store">
             <Button variant="primary">Browse Products</Button>
           </Link>
@@ -89,7 +83,7 @@ export function DownloadPage() {
           <h1 className="font-heading text-2xl font-bold text-primary mb-2">Download Started</h1>
           <p className="text-text-secondary mb-2">Your file is being downloaded.</p>
           <p className="text-sm text-text-muted mb-6">
-            Remaining downloads: {downloadInfo.download.remainingDownloads - 1}
+            Remaining downloads: {Math.max(0, (downloadInfo.download?.remainingDownloads ?? 0) - 1)}
           </p>
           <Link to="/store">
             <Button variant="primary">Continue Shopping</Button>
@@ -100,18 +94,24 @@ export function DownloadPage() {
   }
 
   return (
+    <>
+      <SEO
+        title="Download Your Template"
+        description="Securely download your purchased TrueWorks template. One-time signed link with a 5-hour expiry."
+        canonical="/download"
+      />
     <div className="pt-24 md:pt-28 min-h-screen flex items-center justify-center">
       <div className="text-center max-w-md mx-auto p-8">
         <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-accent/10 flex items-center justify-center">
           <Download className="w-10 h-10 text-accent" />
         </div>
         <h1 className="font-heading text-2xl font-bold text-primary mb-2">
-          {downloadInfo.download.productName}
+          {downloadInfo.download?.productName ?? 'Your template'}
         </h1>
         <p className="text-text-secondary mb-2">Your download is ready</p>
         <p className="text-sm text-text-muted mb-6">
-          {downloadInfo.download.remainingDownloads} downloads remaining. Expires{' '}
-          {new Date(downloadInfo.download.expiryDate).toLocaleDateString()}
+          {(downloadInfo.download?.remainingDownloads ?? 0)} downloads remaining. Expires{' '}
+          {new Date(downloadInfo.download?.expiryDate ?? Date.now()).toLocaleDateString()}
         </p>
         <Button
           variant="accent"
@@ -132,9 +132,10 @@ export function DownloadPage() {
           )}
         </Button>
         <p className="text-xs text-text-muted mt-4">
-          Files: {downloadInfo.download.files.join(', ')}
+          Files: {(downloadInfo.download?.files ?? ['Template file']).join(', ')}
         </p>
       </div>
     </div>
+    </>
   );
 }

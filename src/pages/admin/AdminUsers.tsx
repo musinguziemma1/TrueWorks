@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Plus, Edit, Trash2, Search, Shield, ShieldCheck } from 'lucide-react';
-import { useQuery } from 'convex/react';
+import { useAdminQuery } from '../../hooks/useAdminQuery';
 import { api } from '../../../convex/_generated/api';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -16,7 +16,7 @@ const roleColors: Record<string, 'primary' | 'success' | 'warning' | 'error' | '
 };
 
 export function AdminUsers() {
-  const users = useQuery(api.users.list, {});
+  const users = useAdminQuery(api.users.list, {});
 
   const rows: UserRow[] = useMemo(() => {
     if (!users) return [];
@@ -40,7 +40,7 @@ export function AdminUsers() {
       key: 'name', label: 'User',
       render: (u) => (
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center text-white text-sm font-bold">
+          <div className="w-9 h-9 rounded-full bg-linear-to-br from-secondary to-primary flex items-center justify-center text-white text-sm font-bold">
             {u.name.split(' ').map(n => n[0]).join('')}
           </div>
           <div>
@@ -72,7 +72,7 @@ export function AdminUsers() {
   ];
 
   const roles = ['admin', 'store_manager', 'content_editor', 'marketing', 'support', 'finance'];
-  const adminCount = users.filter(u => u.role === 'admin').length;
+  const adminCount = (users ?? []).filter(u => u.role === 'admin').length;
 
   return (
     <div>
@@ -86,7 +86,7 @@ export function AdminUsers() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         {[
-          { label: 'Active Users', value: users.length.toString(), color: 'text-success' },
+          { label: 'Active Users', value: (users ?? []).length.toString(), color: 'text-success' },
           { label: 'Roles', value: roles.length.toString(), color: 'text-primary' },
           { label: 'Admin Users', value: adminCount.toString(), color: 'text-accent' },
           { label: 'Pending Invites', value: '0', color: 'text-text-muted' },

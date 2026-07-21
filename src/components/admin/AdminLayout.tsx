@@ -1,12 +1,14 @@
-import { useState } from 'react';
-import { Link, useLocation, Outlet } from 'react-router-dom';
+import { Suspense, useState } from 'react';
+import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { PageSkeleton } from '../loading/PageSkeleton';
 import {
   LayoutDashboard, Package, ShoppingCart, Users, Download, LayoutGrid,
   FileText, Image, Mail, Star, BarChart3, CreditCard, FileSpreadsheet,
   Shield, Settings, HelpCircle, ChevronLeft, ChevronRight, Bell, Search,
-  Menu, X, GraduationCap, Briefcase, Users2, Newspaper, Globe, Sun, Moon
+  Menu, X, GraduationCap, Briefcase, Users2, Newspaper, Globe, Sun, Moon, LogOut
 } from 'lucide-react';
+import { useAuthActions, useConvexAuth } from '@convex-dev/auth/react';
 import { cn } from '../../lib/utils';
 
 interface SidebarItem {
@@ -81,11 +83,24 @@ export function AdminLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('admin-dark-mode') === 'true');
   const location = useLocation();
+  const navigate = useNavigate();
+  const { signOut } = useAuthActions();
+  const { isAuthenticated, isLoading } = useConvexAuth();
 
   const toggleDark = () => {
     setDarkMode(!darkMode);
     localStorage.setItem('admin-dark-mode', String(!darkMode));
     document.documentElement.classList.toggle('admin-dark', !darkMode);
+  };
+
+  // Sign out + redirect to login. We let ProtectedRoute handle
+  // the redirect if session is gone, but explicit is safer.
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } finally {
+      navigate('/admin/login', { replace: true });
+    }
   };
 
   return (
@@ -111,7 +126,7 @@ export function AdminLayout() {
       )}>
         <div className="flex items-center justify-between p-4 border-b border-white/10">
           <Link to="/admin" className="flex items-center gap-3 overflow-hidden">
-            <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center shrink-0">
               <span className="font-heading font-bold text-xs text-white">TW</span>
             </div>
             {!collapsed && (
@@ -157,7 +172,7 @@ export function AdminLayout() {
                           : 'text-white/60 hover:bg-white/10 hover:text-white'
                     )}
                   >
-                    <Icon className={cn('w-5 h-5 flex-shrink-0', active && 'text-accent')} />
+                    <Icon className={cn('w-5 h-5 shrink-0', active && 'text-accent')} />
                     {!collapsed && (
                       <>
                         <span className="truncate">{item.label}</span>
@@ -210,13 +225,21 @@ export function AdminLayout() {
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-accent" />
               </button>
               <div className="flex items-center gap-2 pl-3 border-l border-border">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center text-white text-sm font-bold">
+                <div className="w-8 h-8 rounded-full bg-linear-to-br from-secondary to-primary flex items-center justify-center text-white text-sm font-bold">
                   A
                 </div>
                 <div className="hidden sm:block">
                   <p className="text-sm font-semibold text-primary">Admin</p>
                   <p className="text-xs text-text-muted">Administrator</p>
                 </div>
+                <button
+                  onClick={handleSignOut}
+                  className="ml-2 p-2 rounded-md hover:bg-section hover:text-error transition-colors text-text-secondary"
+                  title="Sign out"
+                  aria-label="Sign out"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
               </div>
             </div>
           </div>
@@ -224,7 +247,15 @@ export function AdminLayout() {
 
         {/* Page content */}
         <main className="p-4 md:p-6">
-          <Outlet />
+          {isLoading || !isAuthenticated ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : (
+            <Suspense fallback={<PageSkeleton />}>
+              <Outlet />
+            </Suspense>
+          )}
         </main>
       </div>
     </div>

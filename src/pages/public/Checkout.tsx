@@ -8,6 +8,8 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { useCartStore } from '../../lib/store';
 import { formatPrice, cn } from '../../lib/utils';
+import { SEO } from '../../components/SEO';
+import { checkoutContactSchema, parseForm } from '../../lib/validation';
 
 type PaymentMethod = 'mtn_momo' | 'airtel_money' | 'visa' | 'mastercard';
 
@@ -26,14 +28,37 @@ export function Checkout() {
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', company: '' });
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<'name' | 'email' | 'phone' | 'company', string>>>({});
   const createCustomer = useMutation(api.customers.create);
   const createOrder = useMutation(api.orders.create);
   const initiatePayment = useMutation(api.payments_integration.initiatePayment);
   const confirmPayment = useMutation(api.payments_integration.confirmPayment);
 
+  const handleContinueToPayment = () => {
+    const result = parseForm(checkoutContactSchema, formData);
+    if (!result.ok) {
+      setFieldErrors(result.errors);
+      setError('Please complete the missing contact details before continuing.');
+      return;
+    }
+
+    setFieldErrors({});
+    setError(null);
+    setStep('payment');
+  };
+
   const handlePlaceOrder = async () => {
+    const result = parseForm(checkoutContactSchema, formData);
+    if (!result.ok) {
+      setFieldErrors(result.errors);
+      setError('Please complete the missing contact details before placing your order.');
+      setStep('info');
+      return;
+    }
+
     setIsProcessing(true);
     setError(null);
+    setFieldErrors({});
 
     try {
       const customerId = await createCustomer({
@@ -73,7 +98,7 @@ export function Checkout() {
       });
 
       clearCart();
-      navigate('/order-confirmation', { state: { orderId: id } });
+      navigate('/order-confirmation', { state: { orderId: id, email: formData.email } });
     } catch (err) {
       console.error('Order creation error:', err);
       setError('An error occurred while processing your order. Please try again.');
@@ -93,6 +118,12 @@ export function Checkout() {
   ];
 
   return (
+    <>
+      <SEO
+        title="Secure Checkout"
+        description="Complete your order securely with Mobile Money or Card payment. Instant download on confirmation."
+        canonical="/checkout"
+      />
     <div className="pt-24 md:pt-28 min-h-screen bg-section">
       <div className="max-w-6xl mx-auto px-4 md:px-6 py-8">
         {/* Steps */}
@@ -122,12 +153,12 @@ export function Checkout() {
                   <h2 className="font-heading text-xl font-bold text-primary mb-6">Contact Information</h2>
                   <div className="space-y-4">
                     <div className="grid sm:grid-cols-2 gap-4">
-                      <Input label="Full Name" placeholder="Your name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} required />
-                      <Input label="Email Address" type="email" placeholder="you@organization.com" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} required />
+                      <Input label="Full Name" placeholder="Your name" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} error={fieldErrors.name} required />
+                      <Input label="Email Address" type="email" placeholder="you@organization.com" value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})} error={fieldErrors.email} required />
                     </div>
-                    <Input label="Phone Number" placeholder="+256 700 000 000" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} required />
-                    <Input label="Organization (optional)" placeholder="Your company or organization" value={formData.company} onChange={(e) => setFormData({...formData, company: e.target.value})} />
-                    <Button variant="primary" size="lg" onClick={() => setStep('payment')} className="mt-4">
+                    <Input label="Phone Number" placeholder="+256 700 000 000" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} error={fieldErrors.phone} required />
+                    <Input label="Organization (optional)" placeholder="Your company or organization" value={formData.company} onChange={(e) => setFormData({...formData, company: e.target.value})} error={fieldErrors.company} />
+                    <Button variant="primary" size="lg" onClick={handleContinueToPayment} className="mt-4">
                       Continue to Payment
                     </Button>
                   </div>
@@ -201,7 +232,7 @@ export function Checkout() {
                     size="lg"
                     fullWidth
                     onClick={handlePlaceOrder}
-                    disabled={isProcessing}
+                    disabled={isProcessing || !formData.name || !formData.email || !formData.phone}
                   >
                     {isProcessing ? (
                       <>
@@ -231,8 +262,8 @@ export function Checkout() {
               <div className="space-y-3 mb-4">
                 {items.map((item) => (
                   <div key={item.product._id} className="flex gap-3">
-                    <div className="w-16 h-16 rounded-lg bg-section flex-shrink-0 flex items-center justify-center overflow-hidden">
-                      {item.product.thumbnail && item.product.thumbnail.startsWith('/') ? (
+                    <div className="w-16 h-16 rounded-lg bg-section shrink-0 flex items-center justify-center overflow-hidden">
+                      {item.product.thumbnail ? (
                         <img src={item.product.thumbnail} alt={item.product.name} className="w-full h-full object-cover" />
                       ) : (
                         <Smartphone className="w-6 h-6 text-text-muted" />
@@ -261,5 +292,6 @@ export function Checkout() {
         </div>
       </div>
     </div>
+    </>
   );
 }

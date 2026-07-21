@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
+import { requireStaffUser } from "./auth.helpers";
 
 const HOME_LAYOUT_KEY = "home_layout";
 type HomeLayout = "original" | "showroom" | "editorial" | "trust";
@@ -25,6 +26,7 @@ export const updateHomeLayout = mutation({
     ),
   },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     const existing = await ctx.db
       .query("settings")
       .withIndex("by_key", (q) => q.eq("key", HOME_LAYOUT_KEY))

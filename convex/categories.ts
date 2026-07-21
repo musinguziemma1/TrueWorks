@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
+import { requireStaffUser } from "./auth.helpers";
 
 export const list = query({
   handler: async (ctx) => {
@@ -27,6 +28,7 @@ export const create = mutation({
     parent: v.optional(v.id("categories")),
   },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     return await ctx.db.insert("categories", { ...args, productCount: 0 });
   },
 });
@@ -43,6 +45,7 @@ export const update = mutation({
     parent: v.optional(v.id("categories")),
   },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     const { id, ...fields } = args;
     await ctx.db.patch(id, fields);
     return await ctx.db.get(id);
@@ -52,6 +55,7 @@ export const update = mutation({
 export const remove = mutation({
   args: { id: v.id("categories") },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     await ctx.db.delete(args.id);
   },
 });

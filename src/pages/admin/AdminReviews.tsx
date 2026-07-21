@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Check, X, Star, StarHalf, MessageSquare, Search, Filter } from 'lucide-react';
-import { useQuery, useMutation } from 'convex/react';
+import { useMutation } from 'convex/react';
+import { useAdminQuery } from '../../hooks/useAdminQuery';
 import { api } from '../../../convex/_generated/api';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
@@ -8,7 +9,7 @@ import { cn } from '../../lib/utils';
 import { useState } from 'react';
 
 export function AdminReviews() {
-  const reviews = useQuery(api.reviews.list, {});
+  const reviews = useAdminQuery(api.reviews.list, {});
   const approveReview = useMutation(api.reviews.approve);
   const rejectReview = useMutation(api.reviews.reject);
   const toggleFeaturedReview = useMutation(api.reviews.toggleFeatured);
@@ -83,7 +84,7 @@ export function AdminReviews() {
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-accent to-primary flex items-center justify-center text-white text-sm font-bold">
+                  <div className="w-10 h-10 rounded-full bg-linear-to-br from-accent to-primary flex items-center justify-center text-white text-sm font-bold">
                     {review.customerName.split(' ').map((n) => n[0]).join('')}
                   </div>
                   <div>

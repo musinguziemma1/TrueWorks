@@ -14,9 +14,16 @@ const variantStyles = {
   accent: 'bg-accent/5',
 };
 
+const sectionSpacing = {
+  default: 'py-16 md:py-20 lg:py-24',
+  section: 'py-16 md:py-20 lg:py-24',
+  dark: 'py-16 md:py-20 lg:py-24',
+  accent: 'py-16 md:py-20 lg:py-24',
+};
+
 export function Section({ children, className, variant = 'default', id }: SectionProps) {
   return (
-    <section id={id} className={cn('section-padding', variantStyles[variant], className)}>
+    <section id={id} className={cn(sectionSpacing[variant], variantStyles[variant], className)}>
       <div className="max-w-7xl mx-auto">{children}</div>
     </section>
   );
@@ -36,7 +43,7 @@ export function SectionHeader({ title, subtitle, align = 'center', className }: 
       align === 'center' && 'mx-auto text-center',
       className
     )}>
-      <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-4 text-balance">
+      <h2 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold text-primary mb-4 text-balance tracking-tight">
         {title}
       </h2>
       {subtitle && (

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Search, CreditCard, Smartphone, TrendingUp, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
-import { useQuery } from 'convex/react';
+import { useAdminQuery } from '../../hooks/useAdminQuery';
 import { api } from '../../../convex/_generated/api';
 import { formatPrice } from '../../lib/utils';
 import { Badge } from '../../components/ui/Badge';
@@ -16,8 +16,8 @@ const methodIcons: Record<string, React.ElementType> = {
 };
 
 export function AdminPayments() {
-  const payments = useQuery(api.payments.list, {});
-  const stats = useQuery(api.payments.getStats);
+  const payments = useAdminQuery(api.payments.list, {});
+  const stats = useAdminQuery(api.payments.getStats);
 
   if (payments === undefined || stats === undefined) {
     return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
@@ -37,7 +37,7 @@ export function AdminPayments() {
     { key: 'status', label: 'Status', render: (p) => <Badge variant={p.status === 'completed' ? 'success' : p.status === 'failed' ? 'error' : 'warning'}>{p.status}</Badge> },
   ];
 
-  const rows: PaymentRow[] = payments.map(p => ({
+  const rows: PaymentRow[] = (payments ?? []).map(p => ({
     id: p._id,
     order: p.orderNumber,
     amount: p.amount,
@@ -59,19 +59,19 @@ export function AdminPayments() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="p-4 rounded-lg border border-border bg-white">
           <p className="text-xs text-text-muted">Total Collected</p>
-          <p className="font-heading text-xl font-bold text-primary mt-1">{formatPrice(stats.totalRevenue)}</p>
+          <p className="font-heading text-xl font-bold text-primary mt-1">{formatPrice(stats?.totalRevenue ?? 0)}</p>
         </div>
         <div className="p-4 rounded-lg border border-border bg-white">
           <p className="text-xs text-text-muted">Successful</p>
-          <div className="flex items-center gap-2 mt-1"><CheckCircle className="w-4 h-4 text-success" /><span className="font-heading text-xl font-bold text-success">{stats.completed}</span></div>
+          <div className="flex items-center gap-2 mt-1"><CheckCircle className="w-4 h-4 text-success" /><span className="font-heading text-xl font-bold text-success">{stats?.completed ?? 0}</span></div>
         </div>
         <div className="p-4 rounded-lg border border-border bg-white">
           <p className="text-xs text-text-muted">Failed</p>
-          <div className="flex items-center gap-2 mt-1"><XCircle className="w-4 h-4 text-error" /><span className="font-heading text-xl font-bold text-error">{stats.failed}</span></div>
+          <div className="flex items-center gap-2 mt-1"><XCircle className="w-4 h-4 text-error" /><span className="font-heading text-xl font-bold text-error">{stats?.failed ?? 0}</span></div>
         </div>
         <div className="p-4 rounded-lg border border-border bg-white">
           <p className="text-xs text-text-muted">Pending</p>
-          <div className="flex items-center gap-2 mt-1"><AlertCircle className="w-4 h-4 text-warning" /><span className="font-heading text-xl font-bold text-warning">{stats.pending}</span></div>
+          <div className="flex items-center gap-2 mt-1"><AlertCircle className="w-4 h-4 text-warning" /><span className="font-heading text-xl font-bold text-warning">{stats?.pending ?? 0}</span></div>
         </div>
       </div>
 

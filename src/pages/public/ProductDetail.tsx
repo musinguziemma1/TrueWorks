@@ -16,6 +16,8 @@ import { ProductCard } from '../../components/ui/ProductCard';
 import { TestimonialCard } from '../../components/ui/TestimonialCard';
 import { useCartStore } from '../../lib/store';
 import { formatPrice, cn } from '../../lib/utils';
+import { SEO } from '../../components/SEO';
+import { formatBenefitLabel } from '../../lib/productDetailUtils';
 
 export function ProductDetail() {
   const { slug } = useParams();
@@ -44,6 +46,29 @@ export function ProductDetail() {
   const images = product.images.length > 0 ? product.images : null;
 
   return (
+    <>
+      <SEO
+        title={product.name}
+        description={product.shortDescription || product.description?.slice(0, 160) || `Premium Excel template — ${product.name}`}
+        canonical={`/product/${slug}`}
+        ogImage={images?.[0]}
+        ogType="product"
+        jsonLd={{
+          '@type': 'Product',
+          name: product.name,
+          description: product.shortDescription || product.description,
+          image: images,
+          brand: { '@type': 'Brand', name: 'TrueWorks' },
+          offers: {
+            '@type': 'Offer',
+            priceCurrency: 'USD',
+            price: (product.price / 100).toFixed(2),
+            availability: 'https://schema.org/InStock',
+            url: `https://trueworks.com/product/${slug}`,
+          },
+          category: product.category,
+        }}
+      />
     <div className="pt-24 md:pt-28">
       {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-4">
@@ -62,7 +87,7 @@ export function ProductDetail() {
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
           {/* Gallery */}
           <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
-            <div className="aspect-[4/3] rounded-xl bg-gradient-to-br from-section to-section-alt border border-border overflow-hidden relative group">
+            <div className="aspect-4/3 rounded-xl bg-linear-to-br from-section to-section-alt border border-border overflow-hidden relative group">
               {images ? (
                 <img
                   src={images[selectedImage]}
@@ -101,7 +126,7 @@ export function ProductDetail() {
                     key={i}
                     onClick={() => setSelectedImage(i)}
                     className={cn(
-                      'aspect-[4/3] rounded-lg border overflow-hidden transition-colors',
+                      'aspect-4/3 rounded-lg border overflow-hidden transition-colors',
                       selectedImage === i ? 'border-secondary ring-2 ring-secondary/20' : 'border-border hover:border-secondary'
                     )}
                   >
@@ -146,7 +171,7 @@ export function ProductDetail() {
                 <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="p-3 hover:bg-section transition-colors">
                   <Minus className="w-4 h-4" />
                 </button>
-                <span className="px-4 py-3 font-semibold min-w-[3rem] text-center">{quantity}</span>
+                <span className="px-4 py-3 font-semibold min-w-12 text-center">{quantity}</span>
                 <button onClick={() => setQuantity(quantity + 1)} className="p-3 hover:bg-section transition-colors">
                   <Plus className="w-4 h-4" />
                 </button>
@@ -188,6 +213,13 @@ export function ProductDetail() {
               </div>
             </div>
 
+            <div className="rounded-lg border border-border bg-white p-4 mb-6">
+              <div className="flex items-start gap-2 text-sm text-text-secondary">
+                <CheckCircle2 className="w-4 h-4 text-accent mt-0.5 shrink-0" />
+                <p>Instant delivery after purchase, plus a setup guide for faster adoption in your workflow.</p>
+              </div>
+            </div>
+
             {/* Product Meta */}
             <div className="space-y-3 text-sm">
               <div className="flex items-center gap-3 text-text-secondary">
@@ -213,12 +245,22 @@ export function ProductDetail() {
               <div className="mt-6 p-4 rounded-lg bg-white border border-border">
                 <p className="text-sm font-semibold text-text-primary mb-2">Files Included ({product.downloadableFiles.length})</p>
                 <ul className="space-y-1">
-                  {product.downloadableFiles.map((file, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm text-text-secondary">
-                      <FileText className="w-3.5 h-3.5 text-accent" />
-                      {file}
-                    </li>
-                  ))}
+                  {product.downloadableFiles.map((file, i) => {
+                    const fileName = file.split('/').pop() || file;
+                    return (
+                      <li key={i}>
+                        <a
+                          href={file}
+                          download={fileName}
+                          className="flex items-center gap-2 text-sm text-text-secondary hover:text-primary transition-colors"
+                        >
+                          <FileText className="w-3.5 h-3.5 text-accent shrink-0" />
+                          <span className="truncate">{fileName}</span>
+                          <Download className="w-3.5 h-3.5 ml-auto shrink-0" />
+                        </a>
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             )}
@@ -253,8 +295,11 @@ export function ProductDetail() {
                   <div className="grid sm:grid-cols-2 gap-3">
                     {product.whatsInside.map((item, i) => (
                       <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-white border border-border">
-                        <CheckCircle2 className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
-                        <span className="text-sm text-text-secondary">{item}</span>
+                        <CheckCircle2 className="w-5 h-5 text-accent shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-sm font-semibold text-primary">{formatBenefitLabel(item)}</p>
+                          <p className="text-sm text-text-secondary">{item}</p>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -279,7 +324,10 @@ export function ProductDetail() {
           {activeTab === 'faq' && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-3">
               {product.faq.length === 0 ? (
-                <p className="text-text-muted">No FAQs available for this product.</p>
+                <div className="rounded-lg border border-dashed border-border bg-white p-8 text-center">
+                  <p className="text-primary font-semibold">Questions about this template?</p>
+                  <p className="text-sm text-text-muted mt-2">Reach out and we’ll help you confirm the fit before you buy.</p>
+                </div>
               ) : (
                 product.faq.map((faq, idx) => (
                   <details key={idx} className="group">
@@ -296,16 +344,23 @@ export function ProductDetail() {
 
           {activeTab === 'reviews' && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-              {reviews.slice(0, 5).map((r) => (
-                <TestimonialCard
-                  key={r._id}
-                  name={r.customerName}
-                  role=""
-                  company=""
-                  quote={r.content}
-                  rating={r.rating}
-                />
-              ))}
+              {reviews.length === 0 ? (
+                <div className="rounded-lg border border-dashed border-border bg-white p-8 text-center">
+                  <p className="text-primary font-semibold">This template is new to the collection</p>
+                  <p className="text-sm text-text-muted mt-2">Reviews will appear here once customers start sharing feedback.</p>
+                </div>
+              ) : (
+                reviews.slice(0, 5).map((r) => (
+                  <TestimonialCard
+                    key={r._id}
+                    name={r.customerName}
+                    role=""
+                    company=""
+                    quote={r.content}
+                    rating={r.rating}
+                  />
+                ))
+              )}
             </motion.div>
           )}
         </div>
@@ -338,5 +393,6 @@ export function ProductDetail() {
         </div>
       </div>
     </div>
+    </>
   );
 }

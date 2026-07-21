@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import type { Product } from './types';
 
 export interface CartItem {
@@ -18,27 +19,35 @@ interface CartStore {
   subtotal: () => number;
 }
 
-export const useCartStore = create<CartStore>((set, get) => ({
-  items: [],
-  isOpen: false,
-  addItem: (product) => {
-    const items = get().items;
-    const existing = items.find(i => i.product._id === product._id);
-    if (existing) {
-      set({ items: items.map(i => i.product._id === product._id ? { ...i, quantity: i.quantity + 1 } : i) });
-    } else {
-      set({ items: [...items, { product, quantity: 1 }] });
-    }
-  },
-  removeItem: (productId) => set({ items: get().items.filter(i => i.product._id !== productId) }),
-  updateQuantity: (productId, quantity) => set({
-    items: get().items.map(i => i.product._id === productId ? { ...i, quantity } : i),
-  }),
-  clearCart: () => set({ items: [] }),
-  toggleCart: () => set({ isOpen: !get().isOpen }),
-  totalItems: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
-  subtotal: () => get().items.reduce((sum, i) => sum + (i.product.salePrice || i.product.price) * i.quantity, 0),
-}));
+export const useCartStore = create<CartStore>()(
+  persist(
+    (set, get) => ({
+      items: [],
+      isOpen: false,
+      addItem: (product) => {
+        const items = get().items;
+        const existing = items.find(i => i.product._id === product._id);
+        if (existing) {
+          set({ items: items.map(i => i.product._id === product._id ? { ...i, quantity: i.quantity + 1 } : i) });
+        } else {
+          set({ items: [...items, { product, quantity: 1 }] });
+        }
+      },
+      removeItem: (productId) => set({ items: get().items.filter(i => i.product._id !== productId) }),
+      updateQuantity: (productId, quantity) => set({
+        items: get().items.map(i => i.product._id === productId ? { ...i, quantity } : i),
+      }),
+      clearCart: () => set({ items: [] }),
+      toggleCart: () => set({ isOpen: !get().isOpen }),
+      totalItems: () => get().items.reduce((sum, i) => sum + i.quantity, 0),
+      subtotal: () => get().items.reduce((sum, i) => sum + (i.product.salePrice || i.product.price) * i.quantity, 0),
+    }),
+    {
+      name: 'trueworks-cart',
+      partialize: (state) => ({ items: state.items }),
+    },
+  ),
+);
 
 interface UIStore {
   isMobileMenuOpen: boolean;

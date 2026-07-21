@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Plus, Edit, Trash2, Search, Tag } from 'lucide-react';
-import { useQuery } from 'convex/react';
+import { useAdminQuery } from '../../hooks/useAdminQuery';
 import { api } from '../../../convex/_generated/api';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
@@ -12,7 +12,7 @@ interface CouponRow {
 }
 
 export function AdminCoupons() {
-  const coupons = useQuery(api.coupons.list);
+  const coupons = useAdminQuery(api.coupons.list);
 
   const rows: CouponRow[] = useMemo(() => {
     if (!coupons) return [];
@@ -44,7 +44,7 @@ export function AdminCoupons() {
       <span className="font-mono font-bold text-primary bg-section px-2 py-1 rounded text-sm">{c.code}</span>
     )},
     { key: 'type', label: 'Type', render: (c) => <Badge variant="primary">{c.type}</Badge> },
-    { key: 'value', label: 'Value', sortable: true, render: (c) => c.type === 'Percentage' ? `${c.value}%` : `UGX ${c.value.toLocaleString()}` },
+    { key: 'value', label: 'Value', sortable: true, render: (c) => c.type === 'Percentage' ? `${c.value}%` : `$${c.value.toLocaleString()}` },
     { key: 'usage', label: 'Usage', className: 'hidden sm:table-cell' },
     { key: 'expires', label: 'Expires', className: 'hidden md:table-cell' },
     { key: 'active', label: 'Status', render: (c) => <Badge variant={c.active ? 'success' : 'error'}>{c.active ? 'Active' : 'Inactive'}</Badge> },
@@ -70,8 +70,8 @@ export function AdminCoupons() {
         {[
           { label: 'Active Coupons', value: stats.active.toString(), color: 'text-success' },
           { label: 'Total Used', value: stats.totalUsed.toString(), color: 'text-primary' },
-          { label: 'Coupons Available', value: coupons.length.toString(), color: 'text-primary' },
-          { label: 'Avg Discount', value: stats.avgDiscount > 0 ? `${stats.avgDiscount}${coupons[0]?.type === 'percentage' ? '%' : ''}` : 'N/A', color: 'text-primary' },
+          { label: 'Coupons Available', value: (coupons ?? []).length.toString(), color: 'text-primary' },
+          { label: 'Avg Discount', value: stats.avgDiscount > 0 ? `${stats.avgDiscount}${(coupons ?? [])[0]?.type === 'percentage' ? '%' : ''}` : 'N/A', color: 'text-primary' },
         ].map((stat) => (
           <div key={stat.label} className="p-4 rounded-lg border border-border bg-white">
             <p className="text-xs text-text-muted">{stat.label}</p>

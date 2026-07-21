@@ -66,7 +66,7 @@ export function AdminMedia() {
               animate={{ opacity: 1, scale: 1 }}
               className="group rounded-lg border border-border bg-white overflow-hidden hover:shadow-card-hover transition-all cursor-pointer"
             >
-              <div className="aspect-square bg-gradient-to-br from-section to-section-alt flex items-center justify-center">
+              <div className="aspect-square bg-linear-to-br from-section to-section-alt flex items-center justify-center">
                 <Image className="w-10 h-10 text-text-muted/40" />
               </div>
               <div className="p-3">

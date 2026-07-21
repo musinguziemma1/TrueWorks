@@ -117,7 +117,7 @@ export function AdminContent() {
                     <CheckCircle className="w-4 h-4 text-white" />
                   </div>
                 )}
-                <div className={`w-12 h-12 mb-4 rounded-xl bg-gradient-to-br ${layout.color} flex items-center justify-center`}>
+                <div className={`w-12 h-12 mb-4 rounded-xl bg-linear-to-br ${layout.color} flex items-center justify-center`}>
                   <layout.icon className="w-6 h-6 text-white" />
                 </div>
                 <h3 className="font-heading font-bold text-primary text-sm mb-1">{layout.label}</h3>

@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
+import { requireStaffUser } from "./auth.helpers";
 
 export const list = query({
   args: {
@@ -42,6 +43,7 @@ export const create = mutation({
 export const approve = mutation({
   args: { id: v.id("reviews") },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     await ctx.db.patch(args.id, { approved: true });
   },
 });
@@ -49,6 +51,7 @@ export const approve = mutation({
 export const reject = mutation({
   args: { id: v.id("reviews") },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     await ctx.db.delete(args.id);
   },
 });
@@ -56,6 +59,7 @@ export const reject = mutation({
 export const toggleFeatured = mutation({
   args: { id: v.id("reviews") },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     const review = await ctx.db.get(args.id);
     if (review) {
       await ctx.db.patch(args.id, { featured: !review.featured });

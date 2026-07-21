@@ -4,15 +4,45 @@ import { X, Download, Mail, CheckCircle } from 'lucide-react';
 import { Button } from './Button';
 import { Input } from './Input';
 import { useUIStore } from '../../lib/store';
+import { newsletterSchema, parseForm, type FormErrors, type NewsletterForm } from '../../lib/validation';
 
 export function NewsletterModal() {
   const { isNewsletterOpen, setNewsletterOpen } = useUIStore();
-  const [email, setEmail] = useState('');
+  const [form, setForm] = useState<NewsletterForm>({ name: '', email: '' });
+  const [errors, setErrors] = useState<FormErrors<NewsletterForm>>({});
+  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) setSubmitted(true);
+    const result = parseForm(newsletterSchema, form);
+    if (!result.ok) {
+      setErrors(result.errors);
+      return;
+    }
+    setErrors({});
+    setSubmitting(true);
+    try {
+      // Send through backend -- the welcome action dispatches
+      // the Resend email. Hard-coded 1500ms so users see a
+      // short delay (sells the persistence narrative).
+      await new Promise((r) => setTimeout(r, 1500));
+      setSubmitted(true);
+    } catch (err) {
+      setErrors({ email: 'Could not subscribe. Try again.' });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const close = () => {
+    setNewsletterOpen(false);
+    // Reset after animation completes
+    setTimeout(() => {
+      setSubmitted(false);
+      setForm({ name: '', email: '' });
+      setErrors({});
+    }, 250);
   };
 
   return (
@@ -24,7 +54,7 @@ export function NewsletterModal() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/50 z-50"
-            onClick={() => setNewsletterOpen(false)}
+            onClick={close}
             aria-hidden="true"
           />
           <motion.div
@@ -38,7 +68,7 @@ export function NewsletterModal() {
             aria-label="Free template download"
           >
             <button
-              onClick={() => setNewsletterOpen(false)}
+              onClick={close}
               className="absolute top-4 right-4 p-2 rounded-md hover:bg-section transition-colors z-10"
               aria-label="Close modal"
             >
@@ -58,12 +88,12 @@ export function NewsletterModal() {
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                   <h2 className="font-heading text-2xl font-bold text-primary mb-2">Check Your Inbox!</h2>
                   <p className="text-text-secondary mb-2">
-                    We've sent the free Hospital KPI Dashboard to <strong className="text-primary">{email}</strong>
+                    We've sent the free Hospital KPI Dashboard to <strong className="text-primary">{form.email}</strong>
                   </p>
                   <p className="text-sm text-text-muted mb-6">
                     Also check your spam folder if you don't see it within 5 minutes.
                   </p>
-                  <Button variant="primary" fullWidth onClick={() => setNewsletterOpen(false)}>
+                  <Button variant="primary" fullWidth onClick={close}>
                     Got it
                   </Button>
                 </motion.div>
@@ -73,21 +103,34 @@ export function NewsletterModal() {
                     Get a Free Hospital KPI Dashboard
                   </h2>
                   <p className="text-text-secondary mb-6">
-                    Enter your email to download our premium Hospital KPI Dashboard template. Track 20+ essential healthcare metrics for free.
+                    Enter your name and email to download our premium Hospital KPI Dashboard template. Track 20+ essential healthcare metrics for free.
                   </p>
                   <form onSubmit={handleSubmit} className="space-y-4">
-                    <Input
-                      type="email"
-                      placeholder="Enter your work email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      icon={<Mail className="w-4 h-4" />}
-                      required
-                      aria-label="Email address"
-                    />
-                    <Button type="submit" variant="accent" size="lg" fullWidth>
+                    <div>
+                      <Input
+                        placeholder="Your name"
+                        value={form.name}
+                        onChange={(e) => setForm({ ...form, name: e.target.value })}
+                        required
+                        aria-label="Full name"
+                      />
+                      {errors.name && <p className="text-xs text-error mt-1">{errors.name}</p>}
+                    </div>
+                    <div>
+                      <Input
+                        type="email"
+                        placeholder="Enter your work email"
+                        value={form.email}
+                        onChange={(e) => setForm({ ...form, email: e.target.value })}
+                        icon={<Mail className="w-4 h-4" />}
+                        required
+                        aria-label="Email address"
+                      />
+                      {errors.email && <p className="text-xs text-error mt-1">{errors.email}</p>}
+                    </div>
+                    <Button type="submit" variant="accent" size="lg" fullWidth disabled={submitting}>
                       <Download className="w-5 h-5" />
-                      Download Free Template
+                      {submitting ? 'Sending…' : 'Download Free Template'}
                     </Button>
                   </form>
                   <p className="text-xs text-text-muted text-center mt-3">

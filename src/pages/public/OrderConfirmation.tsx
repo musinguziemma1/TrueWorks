@@ -8,14 +8,17 @@ import { Section } from '../../components/ui/Section';
 import { Button } from '../../components/ui/Button';
 import { formatPrice, cn } from '../../lib/utils';
 import type { Id } from '../../../convex/_generated/dataModel';
+import { SEO } from '../../components/SEO';
 
 export function OrderConfirmation() {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [buyerEmail, setBuyerEmail] = useState<string | null>(null);
 
   useEffect(() => {
     const stateId = (location.state as any)?.orderId;
+    const stateEmail = (location.state as any)?.email;
     const paramId = searchParams.get('orderId');
     const id = stateId || paramId;
 
@@ -28,9 +31,18 @@ export function OrderConfirmation() {
       }
       sessionStorage.removeItem('order_placed');
     }
+
+    if (stateEmail) {
+      setBuyerEmail(stateEmail);
+    }
   }, [location.state, searchParams]);
 
-  const order = useQuery(api.orders.getById, orderId ? { id: orderId as Id<"orders"> } : "skip");
+  // Public lookup requires both orderId + matching email
+  // (see convex/orders.ts -> getOrderForBuyer).
+  const order = useQuery(
+    api.orders.getOrderForBuyer,
+    orderId && buyerEmail ? { orderId: orderId as Id<"orders">, email: buyerEmail } : "skip",
+  );
   const paymentStatus = useQuery(api.payments_integration.getPaymentStatus, orderId ? { orderId: orderId as Id<"orders"> } : "skip");
 
   const isValid = order?.paymentStatus === "completed" || order?.orderStatus === "processing";
@@ -42,13 +54,22 @@ export function OrderConfirmation() {
 
   if (!orderId || !order) {
     return (
+      <>
+        <SEO title="Loading your order" canonical="/order-confirmation" />
       <div className="pt-28 min-h-screen flex items-center justify-center">
         <div className="animate-pulse text-text-muted">Loading order details...</div>
       </div>
+      </>
     );
   }
 
   return (
+    <>
+      <SEO
+        title={`Order ${order.orderNumber} Confirmed`}
+        description="Your order has been received. Download links have been emailed to your inbox."
+        canonical="/order-confirmation"
+      />
     <div className="pt-28 min-h-screen">
       <Section className="text-center">
         <motion.div
@@ -96,21 +117,21 @@ export function OrderConfirmation() {
 
           <div className="max-w-lg mx-auto space-y-4 mb-8">
             <div className="p-5 rounded-lg border border-border bg-white flex items-center gap-4 text-left">
-              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center flex-shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
                 <Download className="w-6 h-6 text-accent" />
               </div>
               <div>
                 <h3 className="font-heading font-bold text-primary">Instant Download Available</h3>
-                <p className="text-sm text-text-secondary">Your templates are ready to download now.</p>
+                <p className="text-sm text-text-secondary">Your templates are ready to download as soon as payment is confirmed.</p>
               </div>
             </div>
             <div className="p-5 rounded-lg border border-border bg-white flex items-center gap-4 text-left">
-              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center flex-shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
                 <Mail className="w-6 h-6 text-accent" />
               </div>
               <div>
                 <h3 className="font-heading font-bold text-primary">Email Confirmation Sent</h3>
-                <p className="text-sm text-text-secondary">Check your inbox for download links and receipt.</p>
+                <p className="text-sm text-text-secondary">Check your inbox for your receipt and any delivery details from our team.</p>
               </div>
             </div>
           </div>
@@ -136,7 +157,7 @@ export function OrderConfirmation() {
                     </div>
                     <a
                       href={link.url}
-                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors flex-shrink-0"
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-accent text-white text-sm font-semibold hover:bg-accent/90 transition-colors shrink-0"
                     >
                       <Download className="w-4 h-4" />
                       Download
@@ -163,5 +184,6 @@ export function OrderConfirmation() {
         </motion.div>
       </Section>
     </div>
+    </>
   );
 }

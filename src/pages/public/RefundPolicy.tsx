@@ -1,8 +1,15 @@
 import { motion } from 'framer-motion';
 import { Section } from '../../components/ui/Section';
+import { SEO } from '../../components/SEO';
 
 export function RefundPolicy() {
   return (
+    <>
+      <SEO
+        title="Refund Policy"
+        description="TrueWorks Limited refund policy for digital products — when refunds are issued, how to request one, and our commitment to customer satisfaction."
+        canonical="/refund"
+      />
     <div className="pt-24 md:pt-28">
       <Section variant="dark" className="text-center">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -53,5 +60,6 @@ export function RefundPolicy() {
         </div>
       </Section>
     </div>
+    </>
   );
 }

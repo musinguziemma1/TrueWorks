@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Search, Download, RefreshCw, Clock, Link, ExternalLink, Filter } from 'lucide-react';
-import { useQuery } from 'convex/react';
+import { useAdminQuery } from '../../hooks/useAdminQuery';
 import { api } from '../../../convex/_generated/api';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -17,9 +17,9 @@ interface DownloadRecord {
 }
 
 export function AdminDownloads() {
-  const downloads = useQuery(api.downloads.list, {});
-  const stats = useQuery(api.downloads.getStats);
-  const products = useQuery(api.products.list, {});
+  const downloads = useAdminQuery(api.downloads.list, {});
+  const stats = useAdminQuery(api.downloads.getStats);
+  const products = useAdminQuery(api.products.list, {});
 
   const records: DownloadRecord[] = useMemo(() => {
     if (!downloads || !products) return [];

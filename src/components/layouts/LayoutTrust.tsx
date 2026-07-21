@@ -11,8 +11,8 @@ import { useCartStore } from '../../lib/store';
 import type { Product } from '../../lib/types';
 
 const stagger = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.1 } } };
-const fadeUp = { hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } } };
-const fadeIn = { hidden: { opacity: 0, scale: 0.92 }, visible: { opacity: 1, scale: 1, transition: { duration: 0.45, ease: 'easeOut' } } };
+const fadeUp = { hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' as const } } };
+const fadeIn = { hidden: { opacity: 0, scale: 0.92 }, visible: { opacity: 1, scale: 1, transition: { duration: 0.45, ease: 'easeOut' as const } } };
 
 const partners = [
   'Healthcare Facilities', 'NGOs', 'Financial Institutions', 'Educational Institutions',
@@ -39,13 +39,13 @@ export function LayoutTrust() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative min-h-[85vh] flex items-center overflow-hidden bg-gradient-to-br from-[#060D1A] via-[#0B1A35] to-[#0B2545]">
+      <section className="relative min-h-[85vh] flex items-center overflow-hidden bg-linear-to-br from-[#060D1A] via-[#0B1A35] to-primary">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(201,162,39,0.05),transparent_50%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,rgba(74,111,165,0.08),transparent_50%)]" />
         <div className="relative max-w-7xl mx-auto px-4 md:px-6 py-24 md:py-32 w-full">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <motion.div initial="hidden" animate="visible" variants={stagger}>
-              <motion.div variants={fadeUp} className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.07] border border-white/[0.08] mb-6">
+              <motion.div variants={fadeUp} className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/7 border border-white/8 mb-6">
                 <BadgeCheck className="w-4 h-4 text-accent" />
                 <span className="text-sm text-white/70 font-medium">Trusted by 50+ organizations</span>
               </motion.div>
@@ -70,7 +70,7 @@ export function LayoutTrust() {
               </motion.div>
 
               {/* Trust bar */}
-              <motion.div variants={fadeUp} className="mt-12 pt-8 border-t border-white/[0.08]">
+              <motion.div variants={fadeUp} className="mt-12 pt-8 border-t border-white/8">
                 <p className="text-xs text-white/30 uppercase tracking-widest mb-4">Trusted by professionals at</p>
                 <div className="flex flex-wrap gap-x-6 gap-y-2">
                   {partners.map(p => (
@@ -92,7 +92,7 @@ export function LayoutTrust() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 + i * 0.1 }}
-                  className={`p-6 rounded-xl bg-white/[0.04] border border-white/[0.08] backdrop-blur-sm ${i === 0 ? 'col-span-2' : ''}`}
+                  className={`p-6 rounded-xl bg-white/4 border border-white/8 backdrop-blur-sm ${i === 0 ? 'col-span-2' : ''}`}
                 >
                   <Quote className="w-6 h-6 text-accent/40 mb-3" />
                   <p className="text-white/70 text-sm leading-relaxed mb-4">&ldquo;{t.quote}&rdquo;</p>
@@ -137,7 +137,7 @@ export function LayoutTrust() {
                 </div>
                 <p className="text-text-secondary text-sm leading-relaxed mb-4">&ldquo;{t.quote}&rdquo;</p>
                 <div className="flex items-center gap-3 pt-3 border-t border-border">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center text-white font-bold text-xs">{t.author.charAt(0)}</div>
+                  <div className="w-9 h-9 rounded-full bg-linear-to-br from-accent to-accent/60 flex items-center justify-center text-white font-bold text-xs">{t.author.charAt(0)}</div>
                   <div>
                     <p className="text-sm font-semibold text-primary">{t.author}</p>
                     <p className="text-xs text-text-muted">{t.role}, {t.org}</p>
@@ -157,7 +157,7 @@ export function LayoutTrust() {
           </motion.div>
           {featuredProducts === undefined ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[1, 2, 3, 4].map(i => <div key={i} className="animate-pulse rounded-lg border border-border bg-white overflow-hidden"><div className="aspect-[4/3] bg-section" /><div className="p-5 space-y-3"><div className="h-4 bg-section rounded w-1/3" /><div className="h-5 bg-section rounded w-3/4" /><div className="h-3 bg-section rounded w-full" /><div className="h-6 bg-section rounded w-1/4" /></div></div>)}
+              {[1, 2, 3, 4].map(i => <div key={i} className="animate-pulse rounded-lg border border-border bg-white overflow-hidden"><div className="aspect-4/3 bg-section" /><div className="p-5 space-y-3"><div className="h-4 bg-section rounded w-1/3" /><div className="h-5 bg-section rounded w-3/4" /><div className="h-3 bg-section rounded w-full" /><div className="h-6 bg-section rounded w-1/4" /></div></div>)}
             </div>
           ) : (
             <motion.div variants={stagger} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

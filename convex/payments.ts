@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
+import { requireStaffUser, getStaffUserOrNull } from "./auth.helpers";
 
 export const list = query({
   args: {
@@ -7,6 +8,8 @@ export const list = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    const staff = await getStaffUserOrNull(ctx);
+    if (!staff) return null;
     let payments = await ctx.db.query("payments").collect();
     if (args.status) payments = payments.filter(p => p.status === args.status);
     payments.sort((a, b) => b._creationTime - a._creationTime);
@@ -18,6 +21,8 @@ export const list = query({
 export const getById = query({
   args: { id: v.id("payments") },
   handler: async (ctx, args) => {
+    const staff = await getStaffUserOrNull(ctx);
+    if (!staff) return null;
     return await ctx.db.get(args.id);
   },
 });
@@ -25,6 +30,8 @@ export const getById = query({
 export const getByOrder = query({
   args: { orderId: v.id("orders") },
   handler: async (ctx, args) => {
+    const staff = await getStaffUserOrNull(ctx);
+    if (!staff) return null;
     return await ctx.db
       .query("payments")
       .withIndex("by_order", (q) => q.eq("orderId", args.orderId))
@@ -57,6 +64,7 @@ export const updateStatus = mutation({
     status: v.union(v.literal("pending"), v.literal("completed"), v.literal("failed"), v.literal("refunded")),
   },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     const { id, ...fields } = args;
     await ctx.db.patch(id, fields);
     return await ctx.db.get(id);
@@ -65,6 +73,8 @@ export const updateStatus = mutation({
 
 export const getStats = query({
   handler: async (ctx) => {
+    const staff = await getStaffUserOrNull(ctx);
+    if (!staff) return null;
     const payments = await ctx.db.query("payments").collect();
     const completed = payments.filter(p => p.status === "completed");
     const totalRevenue = completed.reduce((sum, p) => sum + p.amount, 0);

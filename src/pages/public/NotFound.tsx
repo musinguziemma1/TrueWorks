@@ -2,9 +2,16 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Search } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
+import { SEO } from '../../components/SEO';
 
 export function NotFound() {
   return (
+    <>
+      <SEO
+        title="404 - Page Not Found"
+        description="The page you're looking for doesn't exist or has been moved."
+        canonical="/404"
+      />
     <div className="min-h-screen flex items-center justify-center bg-section">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -24,5 +31,6 @@ export function NotFound() {
         </Link>
       </motion.div>
     </div>
+    </>
   );
 }

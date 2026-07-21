@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
+import { requireStaffUser } from "./auth.helpers";
 
 export const listBlogPosts = query({
   args: {
@@ -52,6 +53,7 @@ export const createBlogPost = mutation({
     featured: v.boolean(),
   },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     return await ctx.db.insert("blogPosts", {
       ...args,
       publishedAt: new Date().toISOString(),
@@ -85,6 +87,7 @@ export const createResource = mutation({
     category: v.string(),
   },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     return await ctx.db.insert("resources", args);
   },
 });
@@ -104,6 +107,7 @@ export const updateBlogPost = mutation({
     featured: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     const { id, ...fields } = args;
     await ctx.db.patch(id, fields);
     return await ctx.db.get(id);
@@ -113,6 +117,7 @@ export const updateBlogPost = mutation({
 export const removeBlogPost = mutation({
   args: { id: v.id("blogPosts") },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     await ctx.db.delete(args.id);
   },
 });
@@ -129,6 +134,7 @@ export const updateResource = mutation({
     category: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     const { id, ...fields } = args;
     await ctx.db.patch(id, fields);
     return await ctx.db.get(id);
@@ -138,6 +144,7 @@ export const updateResource = mutation({
 export const removeResource = mutation({
   args: { id: v.id("resources") },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     await ctx.db.delete(args.id);
   },
 });
@@ -162,6 +169,7 @@ export const updatePageSection = mutation({
     active: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     const { id, ...fields } = args;
     await ctx.db.patch(id, fields);
   },
@@ -187,6 +195,7 @@ export const updateNavigation = mutation({
     badge: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     const { id, ...fields } = args;
     await ctx.db.patch(id, fields);
   },
@@ -208,6 +217,7 @@ export const createCategory = mutation({
     parent: v.optional(v.id("categories")),
   },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     return await ctx.db.insert("categories", { ...args, productCount: 0 });
   },
 });
@@ -224,6 +234,7 @@ export const updateCategory = mutation({
     parent: v.optional(v.id("categories")),
   },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     const { id, ...fields } = args;
     await ctx.db.patch(id, fields);
     return await ctx.db.get(id);
@@ -233,6 +244,7 @@ export const updateCategory = mutation({
 export const removeCategory = mutation({
   args: { id: v.id("categories") },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     await ctx.db.delete(args.id);
   },
 });
@@ -243,14 +255,76 @@ export const sendContactMessage = mutation({
     email: v.string(),
     subject: v.string(),
     message: v.string(),
+    honeypot: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    // ---- Honeypot check ----
+    // If the hidden form field was filled, treat this as bot
+    // spam. Silently succeed (return success) so the bot does
+    // not learn that we detected it. Do NOT persist or notify.
+    if (args.honeypot && args.honeypot.trim().length > 0) {
+      return { ticketId: null };
+    }
+
+    // ---- Server-side business-rule validation ----
+    // Clients already validate via Zod (see src/lib/validation.ts)
+    // but we re-check here to prevent API bypass.
+    if (args.name.length < 2 || args.name.length > 80) {
+      throw new Error("Invalid name length");
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(args.email)) {
+      throw new Error("Invalid email");
+    }
+    if (args.subject.length < 3 || args.subject.length > 120) {
+      throw new Error("Invalid subject");
+    }
+    if (args.message.length < 10 || args.message.length > 2000) {
+      throw new Error("Invalid message length");
+    }
+    if (/[<>]/.test(args.name) || /[<>]/.test(args.subject)) {
+      throw new Error("Invalid characters in name or subject");
+    }
+
+    // ---- Rate limiting ----
+    // Persist the contact as a support ticket, then check the
+    // recent count for the same email. Limit: max 3 tickets
+    // per email in the past hour.
+    const oneHourAgo = Date.now() - 60 * 60 * 1000;
+    const existing = await ctx.db
+      .query("supportTickets")
+      .withIndex("by_status", (q) => q.eq("status", "open"))
+      .collect();
+
+    const recentFromSameEmail = existing.filter(
+      (t) =>
+        t.customerEmail === args.email &&
+        new Date(t._creationTime).getTime() > oneHourAgo
+    );
+    if (recentFromSameEmail.length >= 3) {
+      throw new Error("Rate limit exceeded. Please try again later.");
+    }
+
+    // ---- Persist as a support ticket ----
+    // Using the existing table instead of inventing a new one.
+    const ticketId = await ctx.db.insert("supportTickets", {
+      customerName: args.name,
+      customerEmail: args.email,
+      subject: args.subject,
+      message: args.message,
+      priority: "low" as const,
+      status: "open" as const,
+      category: "contact_form",
+      attachments: [],
+    });
+
+    // ---- Notify admins ----
     await ctx.db.insert("notifications", {
       title: `Contact: ${args.subject}`,
       message: `From ${args.name} (${args.email}): ${args.message.substring(0, 200)}`,
-      type: "system",
+      type: "support" as const,
       read: false,
     });
-    return true;
+
+    return { ticketId };
   },
 });

@@ -1,8 +1,11 @@
 import { query } from "./_generated/server";
 import { Doc, Id } from "./_generated/dataModel";
+import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const getDashboardData = query({
   handler: async (ctx) => {
+    const authUserId = await getAuthUserId(ctx);
+    if (!authUserId) return null;
     const [orders, products, customers, downloads, payments] = await Promise.all([
       ctx.db.query("orders").collect(),
       ctx.db.query("products").collect(),
@@ -67,6 +70,8 @@ export const getDashboardData = query({
 
 export const getSalesTrends = query({
   handler: async (ctx) => {
+    const authUserId = await getAuthUserId(ctx);
+    if (!authUserId) return null;
     const orders = await ctx.db.query("orders").collect();
     const completed = orders.filter(o => o.paymentStatus === "completed");
 
@@ -90,6 +95,8 @@ export const getSalesTrends = query({
 
 export const getMonthlyRevenue = query({
   handler: async (ctx) => {
+    const authUserId = await getAuthUserId(ctx);
+    if (!authUserId) return null;
     const orders = await ctx.db.query("orders").collect();
     const completed = orders.filter(o => o.paymentStatus === "completed");
 
@@ -111,6 +118,8 @@ export const getMonthlyRevenue = query({
 
 export const getProductPerformance = query({
   handler: async (ctx) => {
+    const authUserId = await getAuthUserId(ctx);
+    if (!authUserId) return null;
     const products = await ctx.db.query("products").collect();
     return products
       .filter(p => p.status === "active")
@@ -126,6 +135,8 @@ export const getProductPerformance = query({
 
 export const getPaymentMethodStats = query({
   handler: async (ctx) => {
+    const authUserId = await getAuthUserId(ctx);
+    if (!authUserId) return null;
     const payments = await ctx.db.query("payments").collect();
     const completed = payments.filter(p => p.status === "completed");
     const total = completed.reduce((s, p) => s + p.amount, 0);
@@ -145,6 +156,8 @@ export const getPaymentMethodStats = query({
 
 export const getDownloadStats = query({
   handler: async (ctx) => {
+    const authUserId = await getAuthUserId(ctx);
+    if (!authUserId) return null;
     const downloads = await ctx.db.query("downloads").collect();
     const productMap = new Map<string, { downloads: number; productName: string }>();
 

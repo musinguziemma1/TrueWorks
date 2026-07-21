@@ -1,8 +1,15 @@
 import { motion } from 'framer-motion';
 import { Section } from '../../components/ui/Section';
+import { SEO } from '../../components/SEO';
 
 export function Terms() {
   return (
+    <>
+      <SEO
+        title="Terms of Service"
+        description="TrueWorks Limited terms of service — license terms, payment terms, and usage rights for our digital products."
+        canonical="/terms"
+      />
     <div className="pt-24 md:pt-28">
       <Section variant="dark" className="text-center">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -33,7 +40,7 @@ export function Terms() {
           </ul>
 
           <h2>4. Pricing and Payment</h2>
-          <p>All prices are listed in Ugandan Shillings (UGX). We accept MTN Mobile Money, Airtel Money, Visa, and Mastercard. Payment is processed securely through our payment gateway. Your transaction is confirmed immediately, and your download link is generated automatically.</p>
+          <p>All prices are listed in United States Dollars (USD). We accept major credit cards (Visa, Mastercard), mobile money (MTN, Airtel) where supported, and other payment methods available through our payment gateway. Payment is processed securely. Your transaction is confirmed immediately, and your download link is generated automatically.</p>
 
           <h2>5. Account Responsibility</h2>
           <p>You are responsible for maintaining the confidentiality of your account and purchase information. TrueWorks is not liable for any loss or damage arising from unauthorized use of your account.</p>
@@ -52,5 +59,6 @@ export function Terms() {
         </div>
       </Section>
     </div>
+    </>
   );
 }

@@ -31,8 +31,8 @@ export function ProductCard({ product, onAddToCart, onQuickView, featured }: Pro
         featured ? 'col-span-2 md:col-span-1' : ''
       )}
     >
-      <div className="relative aspect-[4/3] bg-section overflow-hidden">
-        {product.thumbnail && product.thumbnail.startsWith('/') ? (
+      <div className="relative aspect-4/3 bg-section overflow-hidden">
+        {product.thumbnail ? (
           <img
             src={product.thumbnail}
             alt={product.name}
@@ -40,7 +40,7 @@ export function ProductCard({ product, onAddToCart, onQuickView, featured }: Pro
             loading="lazy"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-text-muted bg-gradient-to-br from-section to-section-alt">
+          <div className="w-full h-full flex items-center justify-center text-text-muted bg-linear-to-br from-section to-section-alt">
             <div className="text-center p-6">
               <div className="w-16 h-16 mx-auto mb-3 rounded-lg bg-primary/10 flex items-center justify-center">
                 <svg className="w-8 h-8 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">

@@ -8,6 +8,8 @@ import { Button } from '../../components/ui/Button';
 import { ProductCard } from '../../components/ui/ProductCard';
 import { useCartStore, useFilterStore } from '../../lib/store';
 import { cn } from '../../lib/utils';
+import { SEO } from '../../components/SEO';
+import { getFilteredProducts } from '../../lib/productFilters';
 
 const fileTypes = ['Excel (.xlsx)', 'Excel (.xlsm)', 'PowerPoint (.pptx)', 'Word (.docx)', 'PDF'];
 const sortOptions = [
@@ -29,35 +31,39 @@ export function Store() {
   const products = useQuery(api.products.list, {});
   const categories = useQuery(api.categories.list, {});
 
-  const filteredProducts = useMemo(() => {
-    let result = [...(products || [])];
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      result = result.filter(p => p.name.toLowerCase().includes(q) || p.shortDescription.toLowerCase().includes(q));
-    }
-    if (selectedCategory) result = result.filter(p => p.category === selectedCategory);
-    if (selectedIndustry) result = result.filter(p => p.industry === selectedIndustry);
-    if (selectedFileType) result = result.filter(p => p.fileType === selectedFileType);
-    switch (sortBy) {
-      case 'newest': result.sort((a, b) => b._creationTime - a._creationTime); break;
-      case 'popular': break;
-      case 'price_low': result.sort((a, b) => (a.salePrice || a.price) - (b.salePrice || b.price)); break;
-      case 'price_high': result.sort((a, b) => (b.salePrice || b.price) - (a.salePrice || a.price)); break;
-    }
-    return result;
-  }, [products, searchQuery, selectedCategory, selectedIndustry, selectedFileType, sortBy]);
+  const filteredProducts = useMemo(() => getFilteredProducts(products || [], {
+    searchQuery,
+    selectedCategory,
+    selectedIndustry,
+    selectedFileType,
+    sortBy,
+    priceRange: [0, 1000000],
+  }), [products, searchQuery, selectedCategory, selectedIndustry, selectedFileType, sortBy]);
 
   if (products === undefined || categories === undefined) {
     return <div className="pt-28 min-h-screen"><div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div></div>;
   }
 
   return (
+    <>
+      <SEO
+        title="Premium Excel Templates & Business Systems"
+        description="Browse our complete collection of institution-grade Excel templates, financial models, dashboards and business systems for hospitals, NGOs, schools, churches and growing businesses."
+        canonical="/store"
+        jsonLd={{
+          '@type': 'CollectionPage',
+          name: 'TrueWorks Store',
+          description: 'Premium Excel templates and business systems',
+        }}
+      />
     <div className="pt-24 md:pt-28">
       <Section variant="section" className="pt-12 pb-0">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="font-heading text-3xl md:text-4xl font-bold text-primary">Premium Templates</h1>
-            <p className="text-text-secondary mt-1">{filteredProducts.length} products available</p>
+            <p className="text-text-secondary mt-1">
+              {filteredProducts.length === 0 ? 'No matching templates right now' : `${filteredProducts.length} product${filteredProducts.length === 1 ? '' : 's'} available`}
+            </p>
           </div>
           <div className="flex items-center gap-3 w-full md:w-auto">
             <div className="relative flex-1 md:w-64">
@@ -97,10 +103,10 @@ export function Store() {
           <motion.aside
             initial={false}
             animate={{ width: showFilters ? 260 : 0, opacity: showFilters ? 1 : 0 }}
-            className="hidden md:block overflow-hidden flex-shrink-0"
+            className="hidden md:block overflow-hidden shrink-0"
           >
             {showFilters && (
-              <div className="w-[260px] pr-8 space-y-6 pt-4">
+              <div className="w-65 pr-8 space-y-6 pt-4">
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-heading font-bold text-sm text-primary">Categories</h3>
@@ -165,10 +171,13 @@ export function Store() {
           {/* Products */}
           <div className="flex-1 min-w-0 py-6">
             {filteredProducts.length === 0 ? (
-              <div className="text-center py-20">
-                <p className="text-text-muted text-lg mb-2">No templates found</p>
-                <p className="text-text-muted text-sm mb-4">Try adjusting your filters</p>
-                <Button variant="outline" onClick={resetFilters}>Clear Filters</Button>
+              <div className="rounded-2xl border border-dashed border-border bg-white p-10 text-center shadow-sm">
+                <p className="text-primary text-lg font-semibold mb-2">No templates match your current filters</p>
+                <p className="text-text-muted text-sm mb-4">Try a broader search, clear one filter, or browse featured templates instead.</p>
+                <div className="flex justify-center gap-3">
+                  <Button variant="outline" onClick={resetFilters}>Clear Filters</Button>
+                  <Button variant="primary" onClick={() => setSearchQuery('')}>Show All Templates</Button>
+                </div>
               </div>
             ) : (
               <div className={cn(
@@ -184,5 +193,6 @@ export function Store() {
         </div>
       </div>
     </div>
+    </>
   );
 }

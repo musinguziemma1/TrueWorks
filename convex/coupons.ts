@@ -1,8 +1,11 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
+import { requireStaffUser, getStaffUserOrNull } from "./auth.helpers";
 
 export const list = query({
   handler: async (ctx) => {
+    const staff = await getStaffUserOrNull(ctx);
+    if (!staff) return null;
     return await ctx.db.query("coupons").collect();
   },
 });
@@ -28,6 +31,7 @@ export const create = mutation({
     active: v.boolean(),
   },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     return await ctx.db.insert("coupons", {
       ...args,
       code: args.code.toUpperCase(),
@@ -47,6 +51,7 @@ export const update = mutation({
     active: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     const { id, ...fields } = args;
     if (fields.code) fields.code = fields.code.toUpperCase();
     await ctx.db.patch(id, fields);
@@ -56,6 +61,7 @@ export const update = mutation({
 export const remove = mutation({
   args: { id: v.id("coupons") },
   handler: async (ctx, args) => {
+    await requireStaffUser(ctx);
     await ctx.db.delete(args.id);
   },
 });
@@ -73,7 +79,7 @@ export const validate = query({
     if (coupon.usageCount >= coupon.usageLimit) return { valid: false, reason: "Usage limit reached" };
     if (new Date(coupon.expiresAt) < new Date()) return { valid: false, reason: "Coupon has expired" };
     if (coupon.minPurchase && args.orderTotal < coupon.minPurchase) {
-      return { valid: false, reason: `Minimum purchase of UGX ${coupon.minPurchase.toLocaleString()} required` };
+      return { valid: false, reason: `Minimum purchase of $${coupon.minPurchase.toLocaleString()} required` };
     }
 
     let discount = 0;

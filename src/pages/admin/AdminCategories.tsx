@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
-import { useQuery, useMutation } from 'convex/react';
+import { useMutation } from 'convex/react';
+import { useAdminQuery } from '../../hooks/useAdminQuery';
 import { api } from '../../../convex/_generated/api';
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
@@ -9,7 +10,7 @@ import * as Icons from 'lucide-react';
 
 export function AdminCategories() {
   const [query, setQuery] = useState('');
-  const categories = useQuery(api.categories.list);
+  const categories = useAdminQuery(api.categories.list);
   const createCategory = useMutation(api.categories.create);
   const updateCategory = useMutation(api.categories.update);
   const removeCategory = useMutation(api.categories.remove);

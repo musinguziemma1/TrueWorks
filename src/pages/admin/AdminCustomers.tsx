@@ -1,4 +1,4 @@
-import { useQuery } from 'convex/react';
+import { useAdminQuery } from '../../hooks/useAdminQuery';
 import { api } from '../../../convex/_generated/api';
 import { formatDate, formatPrice } from '../../lib/utils';
 import { Badge } from '../../components/ui/Badge';
@@ -8,13 +8,13 @@ import { useState } from 'react';
 
 export function AdminCustomers() {
   const [query, setQuery] = useState('');
-  const customers = useQuery(api.customers.list, {});
+  const customers = useAdminQuery(api.customers.list, {});
 
   if (customers === undefined) {
     return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>;
   }
 
-  const filtered = customers.filter(c => c.name.toLowerCase().includes(query.toLowerCase()) || c.email.toLowerCase().includes(query.toLowerCase()));
+  const filtered = (customers ?? []).filter(c => c.name.toLowerCase().includes(query.toLowerCase()) || c.email.toLowerCase().includes(query.toLowerCase()));
 
   return (
     <div>
@@ -45,7 +45,7 @@ export function AdminCustomers() {
               <motion.tr key={c._id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: idx * 0.03 }} className="border-b border-border last:border-0 hover:bg-section/50 transition-colors cursor-pointer">
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center text-white text-sm font-bold">{c.name.split(' ').map(n => n[0]).join('')}</div>
+                    <div className="w-9 h-9 rounded-full bg-linear-to-br from-secondary to-primary flex items-center justify-center text-white text-sm font-bold">{c.name.split(' ').map(n => n[0]).join('')}</div>
                     <div>
                       <p className="text-sm font-semibold text-primary">{c.name}</p>
                       <p className="text-xs text-text-muted">{c.email}</p>

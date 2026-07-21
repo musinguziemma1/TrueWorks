@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowRight, FileSpreadsheet, BarChart3, Users, Lightbulb, TrendingUp, ShieldCheck, Quote, Star, ArrowUpRight, Play, BookOpen } from 'lucide-react';
+import { ArrowRight, FileSpreadsheet, BarChart3, Users, Lightbulb, TrendingUp, ShieldCheck, Play, BookOpen } from 'lucide-react';
 import { useQuery } from 'convex/react';
 import { api } from '../../../convex/_generated/api';
 import { Button } from '../ui/Button';
@@ -10,8 +10,8 @@ import { useCartStore } from '../../lib/store';
 import type { Product } from '../../lib/types';
 
 const stagger = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.1 } } };
-const fadeUp = { hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } } };
-const fadeIn = { hidden: { opacity: 0, scale: 0.92 }, visible: { opacity: 1, scale: 1, transition: { duration: 0.45, ease: 'easeOut' } } };
+const fadeUp = { hidden: { opacity: 0, y: 24 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' as const } } };
+const fadeIn = { hidden: { opacity: 0, scale: 0.92 }, visible: { opacity: 1, scale: 1, transition: { duration: 0.45, ease: 'easeOut' as const } } };
 
 const steps = [
   { icon: FileSpreadsheet, title: 'Choose Your Template', description: 'Browse our library of institution-grade Excel models, dashboards, and business systems purpose-built for East Africa.', color: 'from-blue-500 to-indigo-600' },
@@ -33,11 +33,11 @@ export function LayoutEditorial() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-[#060D1A] via-[#0B1A35] to-[#0F2244]">
+      <section className="relative min-h-screen flex items-center overflow-hidden bg-linear-to-br from-[#060D1A] via-[#0B1A35] to-[#0F2244]">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(201,162,39,0.06),transparent_60%)]" />
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-24 md:py-32 w-full">
           <motion.div initial="hidden" animate="visible" variants={stagger} className="max-w-4xl mx-auto text-center">
-            <motion.div variants={fadeUp} className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.07] border border-white/[0.08] mb-6">
+            <motion.div variants={fadeUp} className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/7 border border-white/8 mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
               <span className="text-sm text-white/70 font-medium">The workshop your board thinks you paid a firm for</span>
             </motion.div>
@@ -86,11 +86,11 @@ export function LayoutEditorial() {
           </motion.div>
           <div className="relative">
             {/* Connector line */}
-            <div className="hidden md:block absolute top-1/2 left-[15%] right-[15%] h-px bg-gradient-to-r from-transparent via-accent/30 to-transparent -translate-y-1/2" />
+            <div className="hidden md:block absolute top-1/2 left-[15%] right-[15%] h-px bg-linear-to-r from-transparent via-accent/30 to-transparent -translate-y-1/2" />
             <motion.div variants={stagger} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid md:grid-cols-3 gap-8 md:gap-12">
               {steps.map((step, i) => (
                 <motion.div key={step.title} variants={fadeUp} className="relative text-center">
-                  <div className={`w-16 h-16 mx-auto mb-5 rounded-2xl bg-gradient-to-br ${step.color} flex items-center justify-center relative`}>
+                  <div className={`w-16 h-16 mx-auto mb-5 rounded-2xl bg-linear-to-br ${step.color} flex items-center justify-center relative`}>
                     <step.icon className="w-7 h-7 text-white" />
                     <span className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-accent text-white text-xs font-bold flex items-center justify-center">{i + 1}</span>
                   </div>
@@ -115,7 +115,7 @@ export function LayoutEditorial() {
                 &ldquo;{testimonial.quote}&rdquo;
               </blockquote>
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-accent to-accent/60 flex items-center justify-center text-white font-bold text-lg">&rdquo;</div>
+                <div className="w-12 h-12 rounded-full bg-linear-to-br from-accent to-accent/60 flex items-center justify-center text-white font-bold text-lg">&rdquo;</div>
                 <div>
                   <p className="font-semibold text-primary text-sm">{testimonial.author}</p>
                   <p className="text-xs text-text-muted">{testimonial.org}</p>
@@ -158,7 +158,7 @@ export function LayoutEditorial() {
           </motion.div>
           {featuredProducts === undefined ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[1, 2, 3, 4].map(i => <div key={i} className="animate-pulse rounded-lg border border-border bg-white overflow-hidden"><div className="aspect-[4/3] bg-section" /><div className="p-5 space-y-3"><div className="h-4 bg-section rounded w-1/3" /><div className="h-5 bg-section rounded w-3/4" /><div className="h-3 bg-section rounded w-full" /><div className="h-6 bg-section rounded w-1/4" /></div></div>)}
+              {[1, 2, 3, 4].map(i => <div key={i} className="animate-pulse rounded-lg border border-border bg-white overflow-hidden"><div className="aspect-4/3 bg-section" /><div className="p-5 space-y-3"><div className="h-4 bg-section rounded w-1/3" /><div className="h-5 bg-section rounded w-3/4" /><div className="h-3 bg-section rounded w-full" /><div className="h-6 bg-section rounded w-1/4" /></div></div>)}
             </div>
           ) : (
             <motion.div variants={stagger} initial="hidden" whileInView="visible" viewport={{ once: true }} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -200,7 +200,7 @@ export function LayoutEditorial() {
               viewport={{ once: true }}
               className="hidden md:block"
             >
-              <div className="aspect-square rounded-2xl bg-gradient-to-br from-accent/20 via-white/5 to-transparent border border-white/10 p-8 flex flex-col justify-center">
+              <div className="aspect-square rounded-2xl bg-linear-to-br from-accent/20 via-white/5 to-transparent border border-white/10 p-8 flex flex-col justify-center">
                 <p className="text-7xl font-heading font-bold text-white mb-2">98%</p>
                 <p className="text-white/50 text-lg">average cost savings<br />vs. traditional consulting</p>
                 <div className="mt-6 flex items-center gap-2 text-white/40 text-sm">
